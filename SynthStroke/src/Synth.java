@@ -7,11 +7,11 @@ import com.jsyn.unitgen.*;
 public class Synth
 {
 	Synthesizer synth;
-	SawtoothOscillatorBL osc;
 	FunctionOscillator waveFunction, pitchFunction, filterFunction, ampFunction;
 	LineOut lineOut;
-	Add freqAdder, ampAdder;
+	Add freqAdder, filterAdder, ampAdder;
 	DoubleTable waveTable, pitchTable, filterTable, ampTable;
+	FilterLowPass filter;
 	
 	double[] waveArray, pitchArray, filterArray, ampArray;
 	double waveX, waveY, pitchX, pitchY, filterX, filterY, ampX, ampY;
@@ -22,10 +22,9 @@ public class Synth
 	}
 
 	private void init()
-	{
+	{	
 		// Create a context for the synthesizer.
 		synth = JSyn.createSynthesizer();
-		
 		
 		// Start synthesizer using default stereo output at 44100 Hz.
 		synth.start();
@@ -38,7 +37,10 @@ public class Synth
 		synth.add( filterFunction = new FunctionOscillator() );
 		synth.add( ampFunction = new FunctionOscillator() );
 		synth.add( freqAdder = new Add() );
+		synth.add( filterAdder = new Add() );
 		synth.add( ampAdder = new Add() );
+		synth.add( filter = new FilterLowPass() );
+		
 		
 		// Add DoubleTables
 		
@@ -47,29 +49,51 @@ public class Synth
 		filterTable = new DoubleTable(filterArray);
 		ampTable = new DoubleTable(ampArray);
 		
+		
 		// Add DoubleTables to FunctionOscillators
 		
 		waveFunction.function.set( waveTable );
 		pitchFunction.function.set( pitchTable );
 		filterFunction.function.set( filterTable );
-		waveFunction.function.set( waveTable );
+		ampFunction.function.set( ampTable );
+		
+		
+		// Set FunctionOscillator phases to -1
+		
+		waveFunction.phase.setValue(-1);
+		pitchFunction.phase.setValue(-1);
+		filterFunction.phase.setValue(-1);
+		ampFunction.phase.setValue(-1);
+		
 		
 		// Connect function oscillators to respective parameters
 		
-		pitchFunction.output.connect( freqAdder.inputA );
-		freqAdder.output.connect( waveFunction.frequency );
+		pitchFunction.output.connect( freqAdder.inputA );		 
+		freqAdder.output.connect( waveFunction.frequency );		
+		
+		filterFunction.output.connect( filterAdder.inputA );
+		filterAdder.output.connect( filter.frequency );
+		filter.Q.set( 5.0 );
+		waveFunction.output.connect(filter.input);
+		
 		ampFunction.output.connect( ampAdder.inputA );
 		ampAdder.output.connect( waveFunction.amplitude );
+	
+		
+		
+		
 		
 		// Add a stereo audio output unit.
 		
 		synth.add( lineOut = new LineOut() );
+		
 
 		// Connect the main waveFunction oscillator to both channels of the output.
 		
-		waveFunction.output.connect( 0, lineOut.input, 0 );
-		waveFunction.output.connect( 0, lineOut.input, 1 );
+		filter.output.connect( 0, lineOut.input, 0 );
+		filter.output.connect( 0, lineOut.input, 1 );
 
+		
 		// Set the frequency and amplitude for the sine wave
 		
 		waveFunction.frequency.set(waveX);
@@ -86,6 +110,9 @@ public class Synth
 		
 		freqAdder.inputB.set(waveX);
 		ampAdder.inputB.set(waveY);
+		
+		filterAdder.inputB.set(800.0);
+		
 		
 
 		// We only need to start the LineOut. It will pull data from the
@@ -153,33 +180,23 @@ public class Synth
 	{
 		
 		Frame frame = new Frame();
+		Synth synth = new Synth();
 		
-		frame.setPlay(true);
-		while(true)
-		{
-			if(frame.getPlay() == true){
-				System.out.println("wflkgsd");
-			}
-			if(frame.getPlay() == true)
-			{
-				System.out.println("play = " + frame.getPlay());
-				Synth synth = new Synth();
-				
+		while(true){
+			if(frame.getPlay()){
 				// Set parameters before calling play()
-				
-				synth.setWaveArray(frame.getWaveformCanvas().sineTable());
+				synth.setWaveArray(frame.getWaveformCanvas().getTable());
 				synth.setPitchArray(frame.getPitchCanvas().getTable());
 				synth.setFilterArray(frame.getFilterCanvas().getTable());
 				synth.setAmpArray(frame.getAmpCanvas().getTable());
 				
 				synth.setWaveTableXY(800.0, .2);
-				synth.setPitchTableXY(.2, .2);
-				synth.setFilterTableXY(.2, .2);
+				synth.setPitchTableXY(.2, 200.0);
+				synth.setFilterTableXY(.2, 10000.0 );
 				synth.setAmpTableXY(.2, .2);
 				
 				synth.init(); 
 				frame.setPlay(false);
-				System.out.println("play = " + frame.getPlay());
 			}
 		}
 	}

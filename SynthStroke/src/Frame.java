@@ -1,47 +1,14 @@
 import java.awt.Dimension;
-import java.awt.EventQueue;
-import java.awt.Insets;
-import java.awt.Toolkit;
-
-import javax.swing.JFrame;
-import javax.swing.JTabbedPane;
-
-import java.awt.Color;
-
-import javax.swing.UIManager;
-
-import java.awt.FlowLayout;
-
-import javax.swing.JPanel;
-import javax.swing.border.BevelBorder;
-import javax.swing.border.LineBorder;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-
-import java.awt.BorderLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-
-import javax.swing.JSlider;
-import javax.swing.SwingConstants;
-import javax.swing.JButton;
-import javax.swing.JTextField;
-import javax.swing.JSpinner;
-import javax.swing.JSeparator;
-import javax.swing.JLabel;
-import javax.swing.ImageIcon;
-import javax.swing.JToggleButton;
-import javax.swing.JCheckBox;
 
 
 public class Frame {
 
-	private JFrame frame;
-	Canvas waveform, pitch, filter, amp;
+	JFrame frame;
+	volatile Canvas waveform, pitch, filter, amp;
 	DraggableSpinner waveformXSpinner, pitchXSpinner, filterXSpinner, ampXSpinner;
-	boolean play = false;
-	private JButton play_button;
+	volatile boolean play = false;
+	JButton play_button;
+	JTabbedPane tabbedPane;
 
 	/**
 	 * Launch the application.
@@ -78,7 +45,7 @@ public class Frame {
 		frame.setVisible(true);
 		
 		
-		JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
+		tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 		tabbedPane.setBounds(441, 71, 399, 250);
 		tabbedPane.setBackground(Color.LIGHT_GRAY);
 		frame.getContentPane().add(tabbedPane);
@@ -104,7 +71,7 @@ public class Frame {
 		amp.setBackground(Color.WHITE);
 		tabbedPane.addTab("Amplitude", null, amp, null);
 		
-		waveformXSpinner = new DraggableSpinner(false);
+		waveformXSpinner = new DraggableSpinner(0.0, -10.0, 10.0, .1, true);
 		waveformXSpinner.setBounds(721, 334, 119, 28);
 		frame.getContentPane().add(waveformXSpinner);
 		if(tabbedPane.getSelectedIndex() == 0){
@@ -114,7 +81,7 @@ public class Frame {
 		}
 		
 		
-		pitchXSpinner = new DraggableSpinner(false);
+		pitchXSpinner = new DraggableSpinner(0.0, -10.0, 10.0, .1, true);
 		pitchXSpinner.setBounds(721, 334, 119, 28);
 		frame.getContentPane().add(pitchXSpinner);
 		if(tabbedPane.getSelectedIndex() == 1){
@@ -124,7 +91,7 @@ public class Frame {
 		}
 		
 		
-		filterXSpinner = new DraggableSpinner(false);
+		filterXSpinner = new DraggableSpinner(0.0, -10.0, 10.0, .1, true);
 		filterXSpinner.setBounds(721, 334, 119, 28);
 		frame.getContentPane().add(filterXSpinner);
 		if(tabbedPane.getSelectedIndex() == 2){
@@ -134,7 +101,7 @@ public class Frame {
 		}
 		
 		
-		ampXSpinner = new DraggableSpinner(false);
+		ampXSpinner = new DraggableSpinner(0.0, -10.0, 10.0, .1, true);
 		ampXSpinner.setBounds(721, 334, 119, 28);
 		frame.getContentPane().add(ampXSpinner);
 		if(tabbedPane.getSelectedIndex() == 3){
@@ -155,23 +122,36 @@ public class Frame {
 	      };
 	      tabbedPane.addChangeListener(changeListener);
 		
-		play_button = new JButton("Play/Pause");
-		play_button.setBounds(451, 333, 117, 29);
+		play_button = new JButton("Play");
+		play_button.setBounds(451, 333, 74, 29);
         play_button.addActionListener(new ActionListener() {
         	 
             public void actionPerformed(ActionEvent e)
             {
             	setPlay(true);
-                System.out.println("in here");
             }
         }); 
 		frame.getContentPane().add(play_button);
+		
+		JButton clear_button = new JButton("Clear");
+		clear_button.setBounds(545, 333, 87, 29);
+		clear_button.addActionListener(new ActionListener() {
+       	 
+            public void actionPerformed(ActionEvent e)
+            {
+            	clear();
+            }
+        }); 
+		frame.getContentPane().add(clear_button);
+		
 		
 		
 		JLabel skin = new JLabel();
 		skin.setIcon(new ImageIcon("res/GUI 9.png"));
 		skin.setBounds(0, 0, 914, 551);
 		frame.getContentPane().add(skin);
+		
+
 		
 		// must call pack before setting canvases
 		frame.pack();
@@ -194,8 +174,13 @@ public class Frame {
 	
 	public void setPlay(boolean b){
 		play = b;
-		System.out.println("PLAY = " + play);
 	}
+	
+	public void clear(){
+		getCurrentCanvas().clearCanvas();
+		getCurrentCanvas().repaint();
+	}
+	
 	
 	public void setXSlider(int index){
 		switch(index){
@@ -269,5 +254,24 @@ public class Frame {
 		}else{
 			return amp;
 		}
+	}
+	
+	public Canvas getCurrentCanvas(){
+		int index = tabbedPane.getSelectedIndex();
+		switch(index){
+		case 0:
+			return getWaveformCanvas();
+		case 1:
+			return getPitchCanvas();
+		case 2:
+			return getFilterCanvas();
+		case 3:
+			return getAmpCanvas();
+		default:
+			System.out.println("Frame.getCurrentCanvas() null");
+			return null;
+		}
+		
+		
 	}
 }

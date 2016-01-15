@@ -1,6 +1,9 @@
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.LayoutManager;
 import java.awt.Point;
 import java.awt.event.InputEvent;
 import java.awt.event.MouseEvent;
@@ -9,25 +12,51 @@ import java.awt.event.MouseMotionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
+import javax.swing.BorderFactory;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
+import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerModel;
 import javax.swing.JSpinner.DefaultEditor;
+import javax.swing.SpinnerNumberModel;
 
 public class DraggableSpinner extends JSpinner implements MouseListener, MouseMotionListener {
 	private float multiplier = 0.0f;
 	Point mousePoint = new Point();
 	boolean vertical = false;
 
-	public DraggableSpinner(boolean vertical) {
+	public DraggableSpinner(double value, double min, double max, double step, boolean vertical) {
 		vertical = this.vertical;
+		SpinnerNumberModel model = new SpinnerNumberModel(value, min, max, step);
+		this.setModel(model);
 		DefaultEditor defaultEditor = (DefaultEditor) getEditor();
 		JFormattedTextField textField = defaultEditor.getTextField();
+
 		textField.setEditable(false);
 		textField.getCaret().setSelectionVisible(false);
 		textField.setHighlighter(null);
+		textField.setColumns(5);
+		
+		this.setUI(new javax.swing.plaf.basic.BasicSpinnerUI(){
+			  protected Component createNextButton(){
+			    Component c = new JButton();
+			    c.setPreferredSize(new Dimension(0,0));
+			    c.setFocusable(false);
+			    return c;
+			  }
+			  protected Component createPreviousButton(){
+			    Component c = new JButton();
+			    c.setPreferredSize(new Dimension(0,0));
+			    c.setFocusable(false);
+			    return c;
+			  }
+			});
+	  
+		
 		if(vertical)
 		{
 			textField.setCursor(Cursor.getPredefinedCursor(Cursor.N_RESIZE_CURSOR));
@@ -108,10 +137,9 @@ public class DraggableSpinner extends JSpinner implements MouseListener, MouseMo
 	
 	
 	
-	
 	public static void main(String[] args) {
 		JFrame frame = new JFrame();
-		DraggableSpinner spinner= new DraggableSpinner(true);
+		DraggableSpinner spinner= new DraggableSpinner(0.0, -10.0, 10.0, .1, true);
 		
 		//Install the draggable JSpinner
 		
@@ -121,8 +149,6 @@ public class DraggableSpinner extends JSpinner implements MouseListener, MouseMo
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setVisible(true);
 	}
-	
-
 }
 
 	
