@@ -2,6 +2,7 @@ import com.jsyn.JSyn;
 import com.jsyn.Synthesizer;
 import com.jsyn.data.DoubleTable;
 import com.jsyn.unitgen.*;
+import com.softsynth.jsyn.circuits.Reverb1;
 
 
 public class Synth
@@ -12,9 +13,17 @@ public class Synth
 	Add freqAdder, filterAdder, ampAdder;
 	DoubleTable waveTable, pitchTable, filterTable, ampTable;
 	FilterLowPass filter;
+	UnitOscillator oscillator;
+	WhiteNoise noise;
 	
 	double[] waveArray, pitchArray, filterArray, ampArray;
-	double waveX, waveY, pitchX, pitchY, filterX, filterY, ampX, ampY;
+	double pitchFrequency, duration, pitchAmplitude, filterAmplitude, ampAmplitude;
+	double volume = 0.5;
+	
+	double soundDuration;
+	double filterFrequency, resonance;
+	
+	int oscillatorIndex, filterIndex;
 	
 	public Synth()
 	{
@@ -29,10 +38,39 @@ public class Synth
 		// Start synthesizer using default stereo output at 44100 Hz.
 		synth.start();
 		
-
-		// Add FunctionOscillators
+		switch(oscillatorIndex)
+		{
+		case 0:
+			//Sawtooth
+			oscillator = new SawtoothOscillatorBL();
+			synth.add( (SawtoothOscillatorBL)oscillator );
+			break;
+		case 1:
+			//Sine
+			oscillator = new SineOscillator();
+			synth.add( (SineOscillator)oscillator );
+			break;
+		case 2:
+			//Square
+			oscillator = new SquareOscillatorBL();
+			synth.add( (SquareOscillatorBL)oscillator );
+			break;
+		case 3:
+			//Triangle
+			oscillator = new TriangleOscillator();
+			synth.add( (TriangleOscillator)oscillator );
+			break;
+		case 4:
+			//Noise
+			synth.add( noise = new WhiteNoise() );
+			break;
+		default:
+			System.out.println("Something wrong in switch(oscillatorIndex)");
 		
-		synth.add( waveFunction = new FunctionOscillator() );
+		}
+
+		// Add UnitGenerators
+	
 		synth.add( pitchFunction = new FunctionOscillator() );
 		synth.add( filterFunction = new FunctionOscillator() );
 		synth.add( ampFunction = new FunctionOscillator() );
@@ -41,10 +79,11 @@ public class Synth
 		synth.add( ampAdder = new Add() );
 		synth.add( filter = new FilterLowPass() );
 		
+
+		
 		
 		// Add DoubleTables
 		
-		waveTable = new DoubleTable(waveArray);
 		pitchTable = new DoubleTable(pitchArray);
 		filterTable = new DoubleTable(filterArray);
 		ampTable = new DoubleTable(ampArray);
@@ -52,7 +91,6 @@ public class Synth
 		
 		// Add DoubleTables to FunctionOscillators
 		
-		waveFunction.function.set( waveTable );
 		pitchFunction.function.set( pitchTable );
 		filterFunction.function.set( filterTable );
 		ampFunction.function.set( ampTable );
@@ -60,27 +98,37 @@ public class Synth
 		
 		// Set FunctionOscillator phases to -1
 		
-		waveFunction.phase.setValue(-1);
 		pitchFunction.phase.setValue(-1);
 		filterFunction.phase.setValue(-1);
 		ampFunction.phase.setValue(-1);
 		
+
 		
 		// Connect function oscillators to respective parameters
 		
-		pitchFunction.output.connect( freqAdder.inputA );		 
-		freqAdder.output.connect( waveFunction.frequency );		
-		
-		filterFunction.output.connect( filterAdder.inputA );
-		filterAdder.output.connect( filter.frequency );
-		filter.Q.set( 5.0 );
-		waveFunction.output.connect(filter.input);
-		
-		ampFunction.output.connect( ampAdder.inputA );
-		ampAdder.output.connect( waveFunction.amplitude );
-	
-		
-		
+		if(oscillatorIndex != 4) 
+		{
+			pitchFunction.output.connect( freqAdder.inputA );		 
+			freqAdder.output.connect( oscillator.frequency );	
+			
+			filterFunction.output.connect( filterAdder.inputA );
+			filterAdder.output.connect( filter.frequency );
+			filter.Q.set( 5.0 );
+			oscillator.output.connect(filter.input);
+			
+			ampFunction.output.connect( ampAdder.inputA );
+			ampAdder.output.connect( oscillator.amplitude );
+		}
+		else
+		{	
+			filterFunction.output.connect( filterAdder.inputA );
+			filterAdder.output.connect( filter.frequency );
+			filter.Q.set( 5.0 );
+			noise.output.connect(filter.input);
+			
+			ampFunction.output.connect( ampAdder.inputA );
+			ampAdder.output.connect( noise.amplitude );		
+		}
 		
 		
 		// Add a stereo audio output unit.
@@ -88,32 +136,39 @@ public class Synth
 		synth.add( lineOut = new LineOut() );
 		
 
+		
 		// Connect the main waveFunction oscillator to both channels of the output.
 		
 		filter.output.connect( 0, lineOut.input, 0 );
-		filter.output.connect( 0, lineOut.input, 1 );
+		filter.output.connect( 0, lineOut.input, 1 );	
 
+		
 		
 		// Set the frequency and amplitude for the sine wave
 		
-		waveFunction.frequency.set(waveX);
-		waveFunction.amplitude.set(waveY);
+		if(oscillatorIndex != 4)
+		{
+			oscillator.frequency.set(pitchFrequency);
+			oscillator.amplitude.set(volume);
+		}
+		else
+		{
+			noise.amplitude.set(volume);
+		}
 		
-		pitchFunction.frequency.set(pitchX);
-		pitchFunction.amplitude.set(pitchY);
+		pitchFunction.frequency.set(duration);
+		pitchFunction.amplitude.set(pitchAmplitude);
 		
-		filterFunction.frequency.set(filterX);
-		filterFunction.amplitude.set(filterY);
+		filterFunction.frequency.set(duration);
+		filterFunction.amplitude.set(filterAmplitude);
 		
-		ampFunction.frequency.set(ampX);
-		ampFunction.amplitude.set(ampY);
+		ampFunction.frequency.set(duration);
+		ampFunction.amplitude.set(ampAmplitude);
 		
-		freqAdder.inputB.set(waveX);
-		ampAdder.inputB.set(waveY);
-		
-		filterAdder.inputB.set(800.0);
-		
-		
+		freqAdder.inputB.set(pitchFrequency);
+		ampAdder.inputB.set(volume);	
+		filterAdder.inputB.set(filterFrequency);
+				
 
 		// We only need to start the LineOut. It will pull data from the
 		// oscillator.
@@ -125,7 +180,7 @@ public class Synth
 		{
 			double time = synth.getCurrentTime();
 			// Sleep for a few seconds.
-			synth.sleepUntil( time + 5 );
+			synth.sleepUntil( time + soundDuration );
 		} catch( InterruptedException e )
 		{
 			e.printStackTrace();
@@ -136,9 +191,8 @@ public class Synth
 	}
 	
 	public double[] getTable(Canvas c) {
-		return c.getTable();
+		return c.getNormalizedTable();
 	}
-	
 	
 	public void setWaveArray(double [] wavetable){
 		waveArray = wavetable;
@@ -156,26 +210,62 @@ public class Synth
 		ampArray = amptable;
 	}
 	
-	public void setWaveTableXY(double x, double y){
-		waveX = x;
-		waveY = y;
+	public void setOscillatorXY(double x, double y){
+		pitchFrequency = x;
+		volume = y;
 	}
 	
-	public void setPitchTableXY(double x, double y){
-		pitchX = x;
-		pitchY = y;
+	public void setPitchTableXY(double y){
+		pitchAmplitude = y;
 	}
 	
-	public void setFilterTableXY(double x, double y){
-		filterX = x;
-		filterY = y;
+	public void setFilterTableXY(double x){
+		duration = x;
 	}
 	
 	public void setAmpTableXY(double x, double y){
-		ampX = x;
-		ampY = y;
+		duration = x;
+		ampAmplitude = y;
 	}
 
+	public static double secondsToHertz(double seconds)
+	{
+		double hertz = 1/seconds;
+		return hertz;
+	}
+	
+	public void setSoundDuration(double duration)
+	{
+		soundDuration = duration;
+	}
+	
+	public void setFilterFrequency(double frequency)
+	{
+		filterFrequency = frequency;
+	}
+	
+	
+	public void setOscillatorIndex(int index)
+	{
+		oscillatorIndex = index;
+	}
+	
+	public void set(int oscIndex, 
+			double pitchFreq, double pitchAmp, 
+			int filtIndex, double filtFreq, double filtAmp, double filtRes, 
+			double ampAmp, double dur)
+	{
+		oscillatorIndex = oscIndex;
+		pitchFrequency = pitchFreq;
+		pitchAmplitude = pitchAmp;
+		filterIndex = filtIndex;
+		filterFrequency = filtFreq;
+		filterAmplitude = filtAmp;
+		resonance = filtRes;
+		ampAmplitude = ampAmp;
+		duration = dur;
+	}
+	
 	public static void main( String[] args )
 	{
 		
@@ -185,19 +275,26 @@ public class Synth
 		while(true){
 			if(frame.getPlay()){
 				// Set parameters before calling play()
-				synth.setWaveArray(frame.getWaveformCanvas().getTable());
-				synth.setPitchArray(frame.getPitchCanvas().getTable());
-				synth.setFilterArray(frame.getFilterCanvas().getTable());
-				synth.setAmpArray(frame.getAmpCanvas().getTable());
+				synth.setPitchArray(frame.pitchCanvas.getNormalizedTable());
+				synth.setFilterArray(frame.filterCanvas.getNormalizedTable());
+				synth.setAmpArray(frame.ampCanvas.getNormalizedTable());
+			
 				
-				synth.setWaveTableXY(800.0, .2);
-				synth.setPitchTableXY(.2, 200.0);
-				synth.setFilterTableXY(.2, 10000.0 );
-				synth.setAmpTableXY(.2, .2);
+				synth.set(frame.oscillatorComboBox.getSelectedIndex(),
+						frame.pitchFrequencySpinner.getValue(), frame.pitchAmplitudeSpinner.getValue(),
+						1, frame.filterFrequencySpinner.getValue(), frame.filterAmplitudeSpinner.getValue(), 0.5,
+						frame.ampAmplitudeSpinner.getValue(), secondsToHertz(frame.ampDurationSpinner.getValue()));
+				
+				synth.setSoundDuration(frame.ampDurationSpinner.getValue());
 				
 				synth.init(); 
 				frame.setPlay(false);
 			}
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}		
 		}
 	}
 }

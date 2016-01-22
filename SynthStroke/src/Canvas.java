@@ -1,21 +1,24 @@
 import javax.swing.JPanel;
 import javax.swing.border.LineBorder;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics; 
+import java.awt.Graphics2D;
 import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseAdapter;
 import java.util.Arrays;
+import java.util.Random;
 
 
 class Canvas extends JPanel 
 {
 
-	int PANEL_WIDTH;
-	int PANEL_HEIGHT;	
+	int CANVAS_WIDTH;
+	int CANVAS_HEIGHT;	
 	int prevX;
 	double prevY;
 	double[] finalTable;
@@ -32,16 +35,16 @@ class Canvas extends JPanel
 
     public Canvas() 
     {
-    	PANEL_WIDTH = 0;
-    	PANEL_HEIGHT = 0;
+    	CANVAS_WIDTH = 0;
+    	CANVAS_HEIGHT = 0;
     	finalTable = null;
-    	
     	
     	
         addMouseListener(new MouseAdapter()
         {
             public void mousePressed(MouseEvent e)
             {
+            	requestFocus(); //takes focus from other draggablespinners when clicked
             	moveSquare( e.getX(), e.getY(), true ); 
             }
         });
@@ -54,14 +57,6 @@ class Canvas extends JPanel
             }
         });
         
-        addMouseMotionListener(new MouseAdapter()
-        {
-            public void mouseClicked(MouseEvent e)
-            {            	
-            	moveSquare( e.getX(), e.getY(), false );
-            	System.out.println("released");
-            }
-        });
         
     }
 
@@ -84,29 +79,19 @@ class Canvas extends JPanel
  	
     	
     	// if the mouse position has changed and is within the panel constraints
-    	if ( ( ( x != prevX)  || ( y != prevY ) ) && x < PANEL_WIDTH && x >= 0 && y < PANEL_HEIGHT && y >= 0 )
+    	if ( ( ( x != prevX)  || ( y != prevY ) ) && x < CANVAS_WIDTH && x >= 0 && y < CANVAS_HEIGHT && y >= 0 )
     	{
     		
     		// if the mouse is not increasing along the positive horizontal axis 
     		if ( x <= prevX ) 
     		{
-    			
-    			// once a y value has been stored, it will no longer be possible to store another y value 
-    			// until the mouse resumes increasing along the horizontal axis 
-    			//storeYVal = false;
-    			
+    			 			
     			// since x is either staying the same or decreasing, set x to the previous value of x to ensure that
     			// we are not backtracking in our line 
     			x = prevX;
     			
     			// store this x value's y coordinate in the final table
-    			finalTable[x] = y;
-    			
-    			// repaint to clear the entire one-pixel column at this x coordinate
-    			//repaint( x-2, 0, 10, PANEL_HEIGHT );
-    			
-    			
-    		
+    			finalTable[x] = y;   			   			  		
     			
     		}  
     		// else the mouse is increasing along the positive horizontal axis
@@ -141,15 +126,12 @@ class Canvas extends JPanel
     	        	// which is why I have left this check in
     	        	if( sign(tempY+slope) == -1 )
     	        	{
-    	        		System.out.println( "tempY+slope is negative \nSlope = " + slope + "    x = " + x + "    y = " + y + "   tempY+slope = " + (tempY+slope) );
+    	        		System.out.println( "tempY+slope is negative \nSlope = " + slope + "    x = " + x + "    y = " + y + " tempY = " +tempY + "   tempY+slope = " + (tempY+slope) );
     	        	}
     	        	
     	        	// increment the temporary y by the slope
     	        	tempY += slope;
-    	      
-    		        
-    		        // repaint entire screen from the previous x + 1 to x
-    		        //repaint( prevX, 0, x - prevX, PANEL_HEIGHT );
+    	  
     	        }
     		}
 	       
@@ -167,19 +149,19 @@ class Canvas extends JPanel
     {
     	set = false;
     	storeYVal = true;
-    	Arrays.fill(finalTable, ((double)PANEL_HEIGHT/2));
+    	Arrays.fill(finalTable, ((double)CANVAS_HEIGHT/2));
     }
     
     
     // returns preferred size
     public Dimension getPreferredSize() 
     {
-        return (new Dimension(PANEL_WIDTH, PANEL_HEIGHT));
+        return (new Dimension(CANVAS_WIDTH, CANVAS_HEIGHT));
     }
     
     
     // returns the normalized finalTable
-    public double[] getTable() 
+    public double[] getNormalizedTable() 
     {
     	double[] temp = new double[finalTable.length];
     	for(int i = 0; i < temp.length; i++)
@@ -190,45 +172,104 @@ class Canvas extends JPanel
     }
     
     
+    // sets table as finalTable
+    public void setFinalTable(double[] table)
+    {
+    	finalTable = table;
+    }
+    
     // saw wave table
     public double[] sawTable() 
     {
-    	double[] d = new double[PANEL_WIDTH];
-    	double slope = 1.0/(double)PANEL_WIDTH;
-    	double val = 0;
-    	for(int i = 0; i < d.length; i++)
+    	double[] sawTable = new double[CANVAS_WIDTH];
+    	double slope = (double)CANVAS_HEIGHT/(double)CANVAS_WIDTH;
+    	double val = CANVAS_HEIGHT;
+    	for(int i = 0; i < sawTable.length; i++)
     	{
-    		d[i] = val;
-    		val += slope;
+    		sawTable[i] = val;
+    		val -= slope;
     	}
-    	return d;
+    	return sawTable;
+    }
+  
+    
+    // square wave table
+    public double[] squareTable()
+    {
+    	double[] squareTable = sawTable();
+    	for(int i = 0; i < squareTable.length; i++)
+    	{
+    		if(squareTable[i] > (CANVAS_HEIGHT/2)){
+    			squareTable[i] = (double)(CANVAS_HEIGHT-1);
+    		}
+    		else
+    		{
+    			squareTable[i] = 0.0;
+    		}
+    	}
+    	return squareTable;
+    }
+    
+    
+    // triangle wave table
+    public double[] triangleTable()
+    {
+    	double[] triangleTable = new double[CANVAS_WIDTH];
+    	double slope = CANVAS_HEIGHT/(CANVAS_WIDTH/2.0);
+    	double d = CANVAS_HEIGHT;
+    	for(int i = 0; i < (triangleTable.length/2); i++)
+    	{
+    		d -= slope;
+    		triangleTable[i] = d;
+    	}
+    	d = 0.0;
+    	for(int i = (triangleTable.length/2); i < triangleTable.length; i++)
+    	{
+    		triangleTable[i] = d; 
+    		d += slope;
+    	}
+    	return triangleTable;
     }
     
     
     // sine wave table
     public double[] sineTable() 
     {
-    	double[] d = new double[180];
-    	for(int i = 0; i < d.length; i++)
+    	double[] sineTable = new double[CANVAS_WIDTH];
+    	for(int i = 0; i < sineTable.length; i++)
     	{
-    		d[i] = Math.sin(Math.toRadians((double)i));
+    		sineTable[i] = Math.sin( Math.toRadians(i) ) * (CANVAS_HEIGHT-1)/2 + (CANVAS_HEIGHT)/2; 
     	}
-    	return d;
+    	return sineTable;
     } 
     
+    
+    // noise wave table
+    public double[] noiseTable()
+    {
+    	double[] noiseTable = new double[CANVAS_WIDTH];
+    	for(int i = 0; i < noiseTable.length; i++)
+    	{
+    		Random random = new Random();
+    		double randomDouble = 0.0 + ((double)(CANVAS_HEIGHT-1) - 0.0) * random.nextDouble();
+    		noiseTable[i] = randomDouble;
+    	}
+    	return noiseTable;
+    }
     
     // normalizes the finalTable so the values are between -1 and 1
     public double[] normalize(double[] t) 
     {
     	double d;
-    	for(int i = 0; i < PANEL_WIDTH; i++)
+    	for(int i = 0; i < CANVAS_WIDTH; i++)
     	{
     		d = t[i];
-    		d =(((double)PANEL_HEIGHT - d)/(double)PANEL_HEIGHT * 2.0) - 1.0;
+    		d =(((double)CANVAS_HEIGHT - d)/(double)CANVAS_HEIGHT * 2.0) - 1.0;
     		t[i] = d;
     	}
     	return t;
     }
+    
     
     
     // checks the sign of a double
@@ -243,17 +284,19 @@ class Canvas extends JPanel
         throw new IllegalArgumentException("Unfathomed double");
     }
    
-    
+    // call to set values in frame class after calling pack()
     public void set(int width, int height)
     {
-    	PANEL_WIDTH = width;
-    	PANEL_HEIGHT = height;
-    	finalTable = new double[PANEL_WIDTH];
-    	Arrays.fill(finalTable, ((double)PANEL_HEIGHT/2));
+    	CANVAS_WIDTH = width;
+    	CANVAS_HEIGHT = height;
+    	finalTable = new double[CANVAS_WIDTH];
+    	Arrays.fill(finalTable, ((double)CANVAS_HEIGHT/2));
     	set = true;
     	
     }
     
+    
+
     public double getAmplitude(){
     	return amplitude;
     }
@@ -275,11 +318,15 @@ class Canvas extends JPanel
     public void paintComponent(Graphics g) 
     {
         super.paintComponent(g);
+        Graphics2D g2 = (Graphics2D) g;
+        g2.setStroke(new BasicStroke(1));
+        g2.setColor(Color.red);
+        
         if(finalTable != null)
         {
 	        for(int i = 0; i < finalTable.length-1; i++)
 	        {
-	        	g.drawLine(i,(int)finalTable[i],i+1,(int)finalTable[i+1]);
+	        	g2.drawLine(i,(int)finalTable[i],i+1,(int)finalTable[i+1]);
 	        }
         }
         
