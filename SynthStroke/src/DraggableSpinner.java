@@ -150,7 +150,7 @@ public class DraggableSpinner extends JPanel implements MouseListener, MouseMoti
 		});
 		
 		button = new JLabel();
-		button.setIcon(new ImageIcon(“res/vertical spinner.png"));
+		button.setIcon(new ImageIcon("res/vertical spinner.png"));
 		button.setCursor(Cursor.getPredefinedCursor(Cursor.N_RESIZE_CURSOR));
 		button.setBounds(110, 0, 8, 16);
 		add(button);
@@ -257,7 +257,6 @@ public class DraggableSpinner extends JPanel implements MouseListener, MouseMoti
 		}
 		return (double)Double.parseDouble(df.format(d));
 	}
-	
 	
 	public void setValue(double value)
 	{

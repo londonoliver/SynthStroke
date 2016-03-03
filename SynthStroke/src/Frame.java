@@ -30,7 +30,6 @@ import java.awt.image.BufferedImage;
 
 import javax.swing.BorderFactory;
 import javax.swing.JComponent;
-import javax.swing.JFileChooser;
 import javax.swing.JSlider;
 import javax.swing.SwingConstants;
 import javax.swing.JButton;
@@ -48,13 +47,6 @@ import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 
 import javax.swing.JRadioButton;
 import javax.swing.GroupLayout;
@@ -62,16 +54,10 @@ import javax.swing.GroupLayout.Alignment;
 import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
-
-import net.miginfocom.swing.MigLayout;
-
+//import net.miginfocom.swing.MigLayout;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.RowSpec;
-
-import javax.swing.JMenuBar;
-import javax.swing.JMenu;
-import javax.swing.JMenuItem;
 
 
 public class Frame {
@@ -85,14 +71,9 @@ public class Frame {
 	JLabel slot1Label, slot2Label, slot3Label, slot4Label;
 	DraggableSpinner filterTypeSpinner, filterResonanceSpinner, filterAmplitudeSpinner, filterFrequencySpinner;
 	DraggableSpinner pitchFrequencySpinner, pitchAmplitudeSpinner, ampAmplitudeSpinner, ampDurationSpinner;
-	JButton exportButton;
-	JLabel skin;
-	JPanel screenPanel;
-	JMenuBar menuBar;
-	JMenu menu;
-	JFileChooser fileChooser;
-    int returnValue;
-    File file = null;
+	private JButton exportButton;
+	private JLabel skin;
+	private JPanel screenPanel;
 
 	/**
 	 * Launch the application.
@@ -130,7 +111,7 @@ public class Frame {
 		
 		
 		tabbedPane = new JTabbedPane(JTabbedPane.TOP);
-		tabbedPane.setBounds(441, 71, 399, 242); // change width value (399) to 381 for canvas width to be 360 pixels
+		tabbedPane.setBounds(213, 52, 457, 306); // change width value (399) to 381 for canvas width to be 360 pixels
 		tabbedPane.setBackground(Color.LIGHT_GRAY);
 		frame.getContentPane().add(tabbedPane);
 
@@ -142,22 +123,22 @@ public class Frame {
 		
 						
 		pitchCanvas = new Canvas();
-		pitchCanvas.setBackground(Color.WHITE);
+		pitchCanvas.setBackground(Color.BLACK);
 		tabbedPane.addTab("Pitch", null, pitchCanvas, null);
 		
 		filterCanvas = new Canvas();
-		filterCanvas.setBackground(Color.WHITE);
+		filterCanvas.setBackground(Color.BLACK);
 		tabbedPane.addTab("Filter", null, filterCanvas, null);
 
 		
 		ampCanvas = new Canvas();
-		ampCanvas.setBackground(Color.WHITE);
+		ampCanvas.setBackground(Color.BLACK);
 		tabbedPane.addTab("Amplitude", null, ampCanvas, null);
 
 		
 		
 	    play_button = new JButton("Play");
-		play_button.setBounds(441, 325, 74, 29);
+		play_button.setBounds(220, 387, 74, 29);
 		frame.getContentPane().add(play_button);
         play_button.addActionListener(new ActionListener() {
         	 
@@ -169,7 +150,7 @@ public class Frame {
 				
 		
 		clear_button = new JButton("Clear");
-		clear_button.setBounds(527, 325, 87, 29);
+		clear_button.setBounds(430, 387, 87, 29);
 		clear_button.addActionListener(new ActionListener() {
        	 
             public void actionPerformed(ActionEvent e)
@@ -193,9 +174,8 @@ public class Frame {
 	    tabbedPane.addChangeListener(changeListener);
 	    
 	    exportButton = new JButton("Export");
-	    exportButton.setBounds(723, 325, 117, 29);
+	    exportButton.setBounds(304, 387, 117, 29);
 	    frame.getContentPane().add(exportButton);
-
 	    
 	    screenPanel = new JPanel();
 	    screenPanel.setBounds(89, 88, 282, 277);
@@ -209,61 +189,61 @@ public class Frame {
         slot1Label.setBounds(6, 6, 133, 14);
         screenPanel.add(slot1Label);
         slot1Label.setFont(new Font("Courier", Font.PLAIN, 13));
-        slot1Label.setForeground(Color.darkGray);
+        slot1Label.setForeground(Color.BLACK);
         
         slot2Label = new JLabel("Frequency");
         slot2Label.setBounds(6, 40, 133, 14);
         screenPanel.add(slot2Label);
         slot2Label.setFont(new Font("Courier", Font.PLAIN, 13));
-        slot2Label.setForeground(Color.darkGray);
+        slot2Label.setForeground(Color.BLACK);
         
         slot3Label = new JLabel("Amplitude");
         slot3Label.setBounds(6, 74, 133, 14);
         screenPanel.add(slot3Label);
         slot3Label.setFont(new Font("Courier", Font.PLAIN, 13));
-        slot3Label.setForeground(Color.darkGray);
+        slot3Label.setForeground(Color.BLACK);
         
         slot4Label = new JLabel("Resonance");
         slot4Label.setBounds(6, 108, 133, 14);
         screenPanel.add(slot4Label);
         slot4Label.setFont(new Font("Courier", Font.PLAIN, 13));
-        slot4Label.setForeground(Color.darkGray);
+        slot4Label.setForeground(Color.BLACK);
 		
-		filterResonanceSpinner = new DraggableSpinner(0.1, 0.1, 5.0, 0.1, true, false); // must be >= 0.1
-		filterResonanceSpinner.setBounds(157, 108, 125, 16);
+		filterResonanceSpinner = new DraggableSpinner(0.0, 0.0, 0.0, 0.0, true, false);
+		filterResonanceSpinner.setBounds(0, 108, 125, 16);
 		screenPanel.add(filterResonanceSpinner);
 		
 		
 		filterFrequencySpinner = new DraggableSpinner(20000.0, 20.0, 20000.0, 10.0, true, false);
-		filterFrequencySpinner.setBounds(157, 40, 125, 16);
+		filterFrequencySpinner.setBounds(0, 40, 125, 16);
 		screenPanel.add(filterFrequencySpinner);
 		filterFrequencySpinner.getSpinner().setLocation(0, 0);
 		filterFrequencySpinner.setUnits("Hz");
 		
 		filterAmplitudeSpinner = new DraggableSpinner(0.0, 0.0, validMaxValue(filterFrequencySpinner.getValue()), 10.0, true, false);
-		filterAmplitudeSpinner.setBounds(157, 74, 122, 16);
+		filterAmplitudeSpinner.setBounds(0, 74, 122, 16);
 		screenPanel.add(filterAmplitudeSpinner);
 		
 		
 		filterTypeSpinner = new DraggableSpinner(0.0, 0.0, 0.0, 0.0, true, true);
-		filterTypeSpinner.setBounds(157, 6, 125, 16);
+		filterTypeSpinner.setBounds(0, 6, 125, 16);
 		screenPanel.add(filterTypeSpinner);
 		
 		pitchFrequencySpinner = new DraggableSpinner(800.0, 20.0, 20000.0, 10.0, true, false);
-		pitchFrequencySpinner.setBounds(157, 6, 125, 16);
+		pitchFrequencySpinner.setBounds(0, 6, 125, 16);
 		screenPanel.add(pitchFrequencySpinner);
 		pitchFrequencySpinner.setUnits("Hz");
 		
 		pitchAmplitudeSpinner = new DraggableSpinner(0.0, 0.0, validMaxValue(pitchFrequencySpinner.getValue()), 10.0, true, false);
-		pitchAmplitudeSpinner.setBounds(157, 40, 125, 16);
+		pitchAmplitudeSpinner.setBounds(0, 40, 125, 16);
 		screenPanel.add(pitchAmplitudeSpinner);
 		
 		ampAmplitudeSpinner = new DraggableSpinner(0.2, 0.0, 0.5, 0.1, true, false);
-		ampAmplitudeSpinner.setBounds(157, 6, 125, 16);
+		ampAmplitudeSpinner.setBounds(0, 6, 125, 16);
 		screenPanel.add(ampAmplitudeSpinner);
 		
 		ampDurationSpinner = new DraggableSpinner(1.0, 0.5, 5.0, 0.1, true, false);
-		ampDurationSpinner.setBounds(157, 40, 125, 16);
+		ampDurationSpinner.setBounds(0, 40, 125, 16);
 		screenPanel.add(ampDurationSpinner);
 		ampDurationSpinner.setUnits("sec");
 		
@@ -271,7 +251,7 @@ public class Frame {
 		comboBox = new JComboBox();
 		comboBox.setModel(new DefaultComboBoxModel(new String[] {
 				"Sawtooth", "Sine", "Square", "Triangle", "Noise"}));
-		comboBox.setBounds(561, 397, 114, 28);
+		comboBox.setBounds(561, 387, 114, 28);
 		frame.getContentPane().add(comboBox);
         comboBox.addActionListener(new ActionListener() {
        	 
@@ -307,114 +287,12 @@ public class Frame {
         });
 		
 		
-        
-        fileChooser = new JFileChooser();
-        
-        
-        menuBar = new JMenuBar();
-		menuBar.setBounds(0, 0, 914, 22);
-		frame.getContentPane().add(menuBar);
-		
-		menu = new JMenu("File");
-		menuBar.add(menu);
-		
-		JMenuItem saveMenuItem = new JMenuItem("Save");
-		menu.add(saveMenuItem);
-		saveMenuItem.addActionListener(new ActionListener()
-		{ 
-			public void actionPerformed(ActionEvent e) 
-			{
-				if(file == null)
-				{
-					returnValue = fileChooser.showSaveDialog(null);
-			        if (returnValue == JFileChooser.APPROVE_OPTION) {
-			        	file = fileChooser.getSelectedFile();
-			        }
-				}
-				
-				if(file == null)
-				{
-					System.out.println("No file chosen");
-				}
-				else
-				{
-					try {
-						ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream(file));
-						outputStream.writeObject(this);  // Write this Frame object
-						outputStream.close();
-					} catch (FileNotFoundException e1) {
-						e1.printStackTrace();
-					} catch (IOException e1) {
-						e1.printStackTrace();
-					}
-				}
-				
-			}
-			
-		});
-		
-		JMenuItem saveAsMenuItem = new JMenuItem("Save As");
-		menu.add(saveAsMenuItem);
-		saveAsMenuItem.addActionListener(new ActionListener()
-		{
-			public void actionPerformed(ActionEvent e) 
-			{
-				returnValue = fileChooser.showSaveDialog(null);
-		        if (returnValue == JFileChooser.APPROVE_OPTION) {
-		        	file = fileChooser.getSelectedFile();
-		        	try {
-						ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream(file));
-						outputStream.writeObject(this);  // Write this Frame object
-						outputStream.close();
-					} catch (FileNotFoundException e1) {
-						e1.printStackTrace();
-					} catch (IOException e1) {
-						e1.printStackTrace();
-					}
-
-		        }
-			}
-			
-		});
-		
-		
-		JMenuItem loadMenuItem = new JMenuItem("Load");
-		menu.add(loadMenuItem);
-		loadMenuItem.addActionListener(new ActionListener()
-		{
-			public void actionPerformed(ActionEvent e) 
-			{
-				returnValue = fileChooser.showOpenDialog(null);
-		        if (returnValue == JFileChooser.APPROVE_OPTION) {
-		        	file = fileChooser.getSelectedFile();
-		        	try {
-						ObjectInputStream inputStream = new ObjectInputStream(new FileInputStream(file));
-						inputStream.read();
-						inputStream.close();
-					} catch (FileNotFoundException e1) {
-						e1.printStackTrace();
-					} catch (IOException e1) {
-						e1.printStackTrace();
-					}
-		        }		       
-			}
-			
-		});
-        
-        
 		skin = new JLabel("");
-		skin.setIcon(new ImageIcon(“res/GUI 12.png"));
+		skin.setIcon(new ImageIcon("res/GUI 13.png"));
 		skin.setBounds(0, 0, 914, 551);
 		frame.getContentPane().add(skin);
 		
 		
-		
-		filterTypeSpinner.getSpinner().addChangeListener(new ChangeListener(){
-
-			public void stateChanged(ChangeEvent e) {
-				setSpinners(tabbedPane.getSelectedIndex());
-			}	
-		});
 		
 		filterFrequencySpinner.getSpinner().addChangeListener(new ChangeListener(){
 
@@ -571,26 +449,9 @@ public class Frame {
 			pitchAmplitudeSpinner.setVisible(false);
 			
 			filterTypeSpinner.setVisible(true);
-			if(getFilterType() == 0)
-			{
-				filterResonanceSpinner.setVisible(false);
-				filterAmplitudeSpinner.setVisible(false);
-				filterFrequencySpinner.setVisible(false);
-				
-				slot2Label.setVisible(false);
-				slot3Label.setVisible(false);
-				slot4Label.setVisible(false);
-			}
-			else
-			{
-				filterResonanceSpinner.setVisible(true);
-				filterAmplitudeSpinner.setVisible(true);
-				filterFrequencySpinner.setVisible(true);
-				
-				slot2Label.setVisible(true);
-				slot3Label.setVisible(true);
-				slot4Label.setVisible(true);
-			}
+			filterResonanceSpinner.setVisible(true);
+			filterAmplitudeSpinner.setVisible(true);
+			filterFrequencySpinner.setVisible(true);
 			
 			ampAmplitudeSpinner.setVisible(false);
 			ampDurationSpinner.setVisible(false);
@@ -660,25 +521,6 @@ public class Frame {
 		}
 		
 		
-	}
-	
-	public int getFilterType()
-	{
-		int type;
-		String string = (String)filterTypeSpinner.spinner.getValue();
-		if(string == "none"){
-			type = 0;
-		}else if(string == "lowpass"){
-			type = 1;
-		}else if(string == "bandpass"){
-			type = 2;
-		}else if(string == "highpass"){
-			type = 3;
-		}else{
-			type = 0;
-			System.out.println("Something went wrong in Frame.getFilterType(), filter type = " + string);
-		}
-		return type;
 	}
 
 	
