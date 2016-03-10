@@ -29,7 +29,12 @@ import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 
 import javax.swing.BorderFactory;
+import javax.swing.BoundedRangeModel;
 import javax.swing.JComponent;
+import javax.swing.JFileChooser;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 import javax.swing.JSlider;
 import javax.swing.SwingConstants;
 import javax.swing.JButton;
@@ -47,6 +52,13 @@ import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 
 import javax.swing.JRadioButton;
 import javax.swing.GroupLayout;
@@ -71,9 +83,25 @@ public class Frame {
 	JLabel slot1Label, slot2Label, slot3Label, slot4Label;
 	DraggableSpinner filterTypeSpinner, filterResonanceSpinner, filterAmplitudeSpinner, filterFrequencySpinner;
 	DraggableSpinner pitchFrequencySpinner, pitchAmplitudeSpinner, ampAmplitudeSpinner, ampDurationSpinner;
+	JKnob masterVolume_knob, pitch_knob;
+	RotaryController pitch_knob2;
 	private JButton exportButton;
 	private JLabel skin;
 	private JPanel screenPanel;
+	
+	JMenuBar menuBar;
+	JMenu menu;
+	JFileChooser fileChooser;
+    int returnValue;
+    File file = null;
+	
+	
+	JPanel keyboardPanel;
+	final int OCTAVES = 7; // change as desired
+	    
+	private WhiteKey[] whites = new WhiteKey [7 * OCTAVES + 1];
+	private BlackKey[] blacks = new BlackKey [5 * OCTAVES];
+	    
 
 	/**
 	 * Launch the application.
@@ -141,6 +169,7 @@ public class Frame {
 		play_button.setBounds(220, 387, 74, 29);
 		frame.getContentPane().add(play_button);
         play_button.addActionListener(new ActionListener() {
+        
         	 
             public void actionPerformed(ActionEvent e)
             {
@@ -160,6 +189,19 @@ public class Frame {
         }); 
 		frame.getContentPane().add(clear_button);
 		clear_button.setVisible(false);
+		
+		
+		
+		masterVolume_knob = new JKnob();
+		masterVolume_knob.setBounds(55, 381, 100, 100);
+		frame.getContentPane().add(masterVolume_knob);
+		
+		
+		pitch_knob = new JKnob();
+		pitch_knob.setBounds(99, 381, 100, 100);
+		frame.getContentPane().add(pitch_knob);
+		 
+		
 		
 		
         
@@ -183,6 +225,30 @@ public class Frame {
 	    screenPanel.setOpaque(false);
         screenPanel.setBackground(new Color(0,0,0,0));
         screenPanel.setLayout(null);
+        
+        
+        
+        keyboardPanel = new JPanel();
+        keyboardPanel.setBounds(68, 428, 1000, 300);
+	    frame.getContentPane().add(keyboardPanel);
+	    keyboardPanel.setOpaque(false);
+	    keyboardPanel.setBackground(new Color(0,0,0,0));
+	    keyboardPanel.setLayout(null);
+	    
+	    for (int i = 0; i < blacks.length; i++) {
+            blacks [i] = new BlackKey (i);
+            keyboardPanel.add (blacks [i]);
+            //blacks [i].addMouseListener (this);
+        }
+        for (int i = 0; i < whites.length; i++) {
+            whites [i] = new WhiteKey (i);
+            keyboardPanel.add (whites [i]);
+            //whites [i].addMouseListener (this);
+        }
+
+        
+        
+        
         
         
         slot1Label = new JLabel("Filter");
@@ -286,7 +352,98 @@ public class Frame {
             }
         });
 		
+ fileChooser = new JFileChooser();
+        
+        
+        menuBar = new JMenuBar();
+		menuBar.setBounds(0, 0, 914, 22);
+		frame.getContentPane().add(menuBar);
 		
+		menu = new JMenu("File");
+		menuBar.add(menu);
+		
+		JMenuItem saveMenuItem = new JMenuItem("Save");
+		menu.add(saveMenuItem);
+		saveMenuItem.addActionListener(new ActionListener()
+		{ 
+			public void actionPerformed(ActionEvent e) 
+			{
+				if(file == null)
+				{
+					returnValue = fileChooser.showSaveDialog(null);
+			        if (returnValue == JFileChooser.APPROVE_OPTION) {
+			        	file = fileChooser.getSelectedFile();
+			        }
+				}
+				
+				if(file == null)
+				{
+					System.out.println("No file chosen");
+				}
+				else
+				{
+					try {
+						ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream(file));
+						outputStream.writeObject(this);  // Write this Frame object
+						outputStream.close();
+					} catch (FileNotFoundException e1) {
+						e1.printStackTrace();
+					} catch (IOException e1) {
+						e1.printStackTrace();
+					}
+				}
+				
+			}
+			
+		});
+		
+		JMenuItem saveAsMenuItem = new JMenuItem("Save As");
+		menu.add(saveAsMenuItem);
+		saveAsMenuItem.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e) 
+			{
+				returnValue = fileChooser.showSaveDialog(null);
+		        if (returnValue == JFileChooser.APPROVE_OPTION) {
+		        	file = fileChooser.getSelectedFile();
+		        	try {
+						ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream(file));
+						outputStream.writeObject(this);  // Write this Frame object
+						outputStream.close();
+					} catch (FileNotFoundException e1) {
+						e1.printStackTrace();
+					} catch (IOException e1) {
+						e1.printStackTrace();
+					}
+
+		        }
+			}
+			
+		});
+		
+		
+		JMenuItem loadMenuItem = new JMenuItem("Load");
+		menu.add(loadMenuItem);
+		loadMenuItem.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e) 
+			{
+				returnValue = fileChooser.showOpenDialog(null);
+		        if (returnValue == JFileChooser.APPROVE_OPTION) {
+		        	file = fileChooser.getSelectedFile();
+		        	try {
+						ObjectInputStream inputStream = new ObjectInputStream(new FileInputStream(file));
+						inputStream.read();
+						inputStream.close();
+					} catch (FileNotFoundException e1) {
+						e1.printStackTrace();
+					} catch (IOException e1) {
+						e1.printStackTrace();
+					}
+		        }		       
+			}
+			
+		});
 		skin = new JLabel("");
 		skin.setIcon(new ImageIcon("res/GUI 13.png"));
 		skin.setBounds(0, 0, 914, 551);
@@ -530,4 +687,59 @@ public class Frame {
 		double d2 = 20000.0 - d1;
 		return Math.min(d1, d2);
 	}
+	
+	interface Key {
+	    // change WD to suit your screen
+	    int WD = 10;
+	    int HT = (WD * 9) / 2;
+	    // change baseNote for starting octave
+	    // multiples of 16 only
+	    int baseNote = 48;
+
+	    int getNote ();
+	}
+
+
+	class BlackKey extends JButton implements Key {
+
+	    final int note;
+
+	    public BlackKey (int pos) {
+	        note = baseNote + 1 + 2 * pos + (pos + 3) / 5 + pos / 5;
+	        int left = 10 + WD
+	                + ((WD * 3) / 2) * (pos + (pos / 5)
+	                + ((pos + 3) / 5));
+	        setBackground (Color.BLACK);
+	        setBounds (left, 10, WD, HT);
+	    }
+
+	    public int getNote () {
+	        return note;
+	    }
+	}
+
+
+	class WhiteKey  extends JButton implements Key {
+
+	      int WWD = (WD * 3) / 2;
+	      int WHT = (HT * 3) / 2;
+	    final int note;
+
+	    public WhiteKey (int pos) {
+
+	        note = baseNote + 2 * pos
+	                - (pos + 4) / 7
+	                - pos / 7;
+	        int left = 10 + WWD * pos;
+	        // I think metal looks better!
+	        //setBackground (Color.WHITE);
+	        setBounds (left, 10, WWD, WHT);
+
+	    }
+
+	    public int getNote () {
+	        return note;
+	    }
+	}
 }
+

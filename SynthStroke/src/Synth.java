@@ -190,6 +190,8 @@ public class Synth
 		synth.stop();
 	}
 	
+	
+	
 	public double[] getTable(Canvas c) {
 		return c.getNormalizedTable();
 	}
