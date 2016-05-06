@@ -320,7 +320,7 @@ class Canvas extends JPanel
         super.paintComponent(g);
         Graphics2D g2 = (Graphics2D) g;
         g2.setStroke(new BasicStroke(1));
-        g2.setColor(Color.red);
+        g2.setColor(Color.blue);
         
         if(finalTable != null)
         {

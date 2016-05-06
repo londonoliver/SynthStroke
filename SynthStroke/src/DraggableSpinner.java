@@ -258,7 +258,6 @@ public class DraggableSpinner extends JPanel implements MouseListener, MouseMoti
 		return (double)Double.parseDouble(df.format(d));
 	}
 	
-	
 	public void setValue(double value)
 	{
 		spinner.setValue(value);

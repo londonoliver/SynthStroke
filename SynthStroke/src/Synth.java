@@ -1,17 +1,8 @@
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-
-import javax.swing.JFileChooser;
-
 import com.jsyn.JSyn;
 import com.jsyn.Synthesizer;
 import com.jsyn.data.DoubleTable;
 import com.jsyn.unitgen.*;
-import com.jsyn.util.WaveRecorder;
-
+import com.softsynth.jsyn.circuits.Reverb1;
 
 
 public class Synth 
@@ -23,19 +14,32 @@ public class Synth
 	LineOut lineOut;
 	Add freqAdder, filterAdder, ampAdder;
 	DoubleTable waveTable, pitchTable, filterTable, ampTable;
+<<<<<<< HEAD
 	FilterBiquadCommon filter;
 	UnitOscillator oscillator;
 	WhiteNoise noise;	
 	WaveRecorder recorder;	
+=======
+	FilterLowPass filter;
+	UnitOscillator oscillator;
+	WhiteNoise noise;
+	
+>>>>>>> origin/master
 	double[] waveArray, pitchArray, filterArray, ampArray;
 	double pitchFrequency, duration, pitchAmplitude, filterAmplitude, ampAmplitude;
 	double volume = 0.5;	
 	double soundDuration;
+<<<<<<< HEAD
 	double filterFrequency, resonance;	
 	int oscillatorIndex, filterIndex;	
 	boolean export; 
 	volatile boolean play = false;
 	File exportFile;
+=======
+	double filterFrequency, resonance;
+	
+	int oscillatorIndex, filterIndex;
+>>>>>>> origin/master
 	
 	public Synth()
 	{
@@ -80,32 +84,6 @@ public class Synth
 			System.out.println("Something wrong in switch(oscillatorIndex)");
 		
 		}
-		
-		switch(filterIndex)
-		{
-		case 0:
-			// none
-			filter = new FilterLowPass();
-			synth.add((FilterLowPass)filter);
-			break;
-		case 1:
-			// lowpass
-			filter = new FilterLowPass();
-			synth.add((FilterLowPass)filter);
-			break;
-		case 2:
-			// bandpass
-			filter = new FilterBandPass();
-			synth.add((FilterBandPass)filter);
-			break;
-		case 3:
-			// highpass
-			filter = new FilterHighPass();
-			synth.add((FilterHighPass)filter);
-			break;
-		default:
-			System.out.println("Something wrong in switch(filterIndex)");
-		}
 
 		// Add UnitGenerators
 	
@@ -115,8 +93,7 @@ public class Synth
 		synth.add( freqAdder = new Add() );
 		synth.add( filterAdder = new Add() );
 		synth.add( ampAdder = new Add() );
-
-
+		synth.add( filter = new FilterLowPass() );
 		
 
 		
@@ -124,13 +101,7 @@ public class Synth
 		// Add DoubleTables
 		
 		pitchTable = new DoubleTable(pitchArray);
-		if(filterIndex == 0){
-			filterTable = new DoubleTable(new double[filterArray.length]); // level the filter array
-		}
-		else
-		{
-			filterTable = new DoubleTable(filterArray);
-		}
+		filterTable = new DoubleTable(filterArray);
 		ampTable = new DoubleTable(ampArray);
 		
 		
@@ -151,15 +122,14 @@ public class Synth
 		
 		// Connect function oscillators to respective parameters
 		
-		filterFunction.output.connect( filterAdder.inputA );
-		filterAdder.output.connect( filter.frequency );	
-		filter.Q.set( resonance );  // need to fix, adds dBs, distorts LineOut if not enough headroom
-		
 		if(oscillatorIndex != 4) 
 		{
 			pitchFunction.output.connect( freqAdder.inputA );		 
 			freqAdder.output.connect( oscillator.frequency );	
 			
+			filterFunction.output.connect( filterAdder.inputA );
+			filterAdder.output.connect( filter.frequency );
+			filter.Q.set( 5.0 );
 			oscillator.output.connect(filter.input);
 			
 			ampFunction.output.connect( ampAdder.inputA );
@@ -167,6 +137,9 @@ public class Synth
 		}
 		else
 		{	
+			filterFunction.output.connect( filterAdder.inputA );
+			filterAdder.output.connect( filter.frequency );
+			filter.Q.set( 5.0 );
 			noise.output.connect(filter.input);
 			
 			ampFunction.output.connect( ampAdder.inputA );
@@ -178,31 +151,12 @@ public class Synth
 		
 		synth.add( lineOut = new LineOut() );
 		
-		
-		
-		if(export)
-		{
-			// Default is stereo, 16 bits.
-			try {
-				recorder = new WaveRecorder( synth, exportFile );
-			} catch (FileNotFoundException e1) {
-				e1.printStackTrace();
-			}	
-			filter.output.connect( 0, recorder.getInput(), 0 ); 
-			filter.output.connect( 0, recorder.getInput(), 1 ); 
-			recorder.start();
-		}
-		else
-		{
-			// Connect the main waveFunction oscillator to both channels of the output.
-			
-			filter.output.connect( 0, lineOut.input, 0 );
-			filter.output.connect( 0, lineOut.input, 1 );
-		}
-		
 
 		
-			
+		// Connect the main waveFunction oscillator to both channels of the output.
+		
+		filter.output.connect( 0, lineOut.input, 0 );
+		filter.output.connect( 0, lineOut.input, 1 );	
 
 		
 		
@@ -229,15 +183,7 @@ public class Synth
 		
 		freqAdder.inputB.set(pitchFrequency);
 		ampAdder.inputB.set(volume);	
-		if(filterIndex == 0)
-		{
-			filterAdder.inputB.set(21000.0); // with a lowpass filter this is essentially "no" filter
-		}
-		else
-		{
-			filterAdder.inputB.set(filterFrequency);
-		}
-		
+		filterAdder.inputB.set(filterFrequency);
 				
 
 		// We only need to start the LineOut. It will pull data from the
@@ -255,21 +201,12 @@ public class Synth
 		{
 			e.printStackTrace();
 		}
-		
-		
-		if(export){
-			recorder.stop();
-			try {
-				recorder.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}		
-		}
-		
-		
+
 		// Stop everything.
 		synth.stop();
 	}
+	
+	
 	
 	public double[] getTable(Canvas c) {
 		return c.getNormalizedTable();
@@ -334,8 +271,7 @@ public class Synth
 	public void set(int oscIndex, 
 			double pitchFreq, double pitchAmp, 
 			int filtIndex, double filtFreq, double filtAmp, double filtRes, 
-			double ampAmp, double dur,
-			boolean export, File exportFile)
+			double ampAmp, double dur)
 	{
 		oscillatorIndex = oscIndex;
 		pitchFrequency = pitchFreq;
@@ -346,49 +282,13 @@ public class Synth
 		resonance = filtRes;
 		ampAmplitude = ampAmp;
 		duration = dur;
-		this.export = export;
-		this.exportFile = exportFile;
 	}
 	
 	public static void main( String[] args )
 	{
 		
-		final Frame frame = new Frame();
-		final Synth synth = new Synth();
-		final JFileChooser fileChooser = new JFileChooser();
-		
-		
-		
-		frame.exportButton.addActionListener(new ActionListener(){
-
-			public void actionPerformed(ActionEvent e) {
-				File exportFile = null;
-				int returnValue;
-				
-				returnValue = fileChooser.showDialog(null, "export");
-				if (returnValue == JFileChooser.APPROVE_OPTION) {
-		        	exportFile = fileChooser.getSelectedFile();
-		        }
-				
-				if(exportFile != null)
-				{
-					synth.setPitchArray(frame.pitchCanvas.getNormalizedTable());
-					synth.setFilterArray(frame.filterCanvas.getNormalizedTable());
-					synth.setAmpArray(frame.ampCanvas.getNormalizedTable());
-				
-					
-					synth.set(frame.oscillatorComboBox.getSelectedIndex(),
-							frame.pitchFrequencySpinner.getValue(), frame.pitchAmplitudeSpinner.getValue(),
-							frame.getFilterType(), frame.filterFrequencySpinner.getValue(), frame.filterAmplitudeSpinner.getValue(), frame.filterResonanceSpinner.getValue(),
-							frame.ampAmplitudeSpinner.getValue(), secondsToHertz(frame.ampDurationSpinner.getValue()),
-							true, exportFile);
-					
-					synth.setSoundDuration(frame.ampDurationSpinner.getValue());
-					synth.init();
-				}
-			}
-			
-		});
+		Frame frame = new Frame();
+		Synth synth = new Synth();
 		
 		while(true){
 			if(frame.getPlay()){
@@ -400,17 +300,14 @@ public class Synth
 				
 				synth.set(frame.oscillatorComboBox.getSelectedIndex(),
 						frame.pitchFrequencySpinner.getValue(), frame.pitchAmplitudeSpinner.getValue(),
-						frame.getFilterType(), frame.filterFrequencySpinner.getValue(), frame.filterAmplitudeSpinner.getValue(), frame.filterResonanceSpinner.getValue(),
-						frame.ampAmplitudeSpinner.getValue(), secondsToHertz(frame.ampDurationSpinner.getValue()),
-						false, null);
+						1, frame.filterFrequencySpinner.getValue(), frame.filterAmplitudeSpinner.getValue(), 0.5,
+						frame.ampAmplitudeSpinner.getValue(), secondsToHertz(frame.ampDurationSpinner.getValue()));
 				
 				synth.setSoundDuration(frame.ampDurationSpinner.getValue());
 				
 				synth.init(); 
 				frame.setPlay(false);
 			}
-			
-			
 			try {
 				Thread.sleep(1000);
 			} catch (InterruptedException e) {
