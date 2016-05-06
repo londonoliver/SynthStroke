@@ -14,30 +14,27 @@ import com.jsyn.util.WaveRecorder;
 
 
 
-public class Synth
+public class Synth 
 {
+
+	private static final long serialVersionUID = -3223845556175532115L;
 	Synthesizer synth;
 	FunctionOscillator waveFunction, pitchFunction, filterFunction, ampFunction;
 	LineOut lineOut;
 	Add freqAdder, filterAdder, ampAdder;
 	DoubleTable waveTable, pitchTable, filterTable, ampTable;
 	FilterBiquadCommon filter;
-	
 	UnitOscillator oscillator;
-	WhiteNoise noise;
-	
-	WaveRecorder recorder;
-	
+	WhiteNoise noise;	
+	WaveRecorder recorder;	
 	double[] waveArray, pitchArray, filterArray, ampArray;
 	double pitchFrequency, duration, pitchAmplitude, filterAmplitude, ampAmplitude;
-	double volume = 0.5;
-	
+	double volume = 0.5;	
 	double soundDuration;
-	double filterFrequency, resonance;
-	
-	int oscillatorIndex, filterIndex;
-	
+	double filterFrequency, resonance;	
+	int oscillatorIndex, filterIndex;	
 	boolean export; 
+	volatile boolean play = false;
 	File exportFile;
 	
 	public Synth()
@@ -421,4 +418,5 @@ public class Synth
 			}		
 		}
 	}
+
 }

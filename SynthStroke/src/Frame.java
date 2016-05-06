@@ -63,11 +63,11 @@ import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
 
-import net.miginfocom.swing.MigLayout;
-
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.RowSpec;
+import com.jsyn.data.DoubleTable;
+import com.jsyn.unitgen.PowerOfTwo;
 
 import javax.swing.JMenuBar;
 import javax.swing.JMenu;
@@ -83,8 +83,8 @@ public class Frame {
 	JTabbedPane tabbedPane;
 	JComboBox comboBox, oscillatorComboBox;
 	JLabel slot1Label, slot2Label, slot3Label, slot4Label;
-	DraggableSpinner filterTypeSpinner, filterResonanceSpinner, filterAmplitudeSpinner, filterFrequencySpinner;
-	DraggableSpinner pitchFrequencySpinner, pitchAmplitudeSpinner, ampAmplitudeSpinner, ampDurationSpinner;
+	volatile DraggableSpinner filterTypeSpinner, filterResonanceSpinner, filterAmplitudeSpinner, filterFrequencySpinner;
+	volatile DraggableSpinner pitchFrequencySpinner, pitchAmplitudeSpinner, ampAmplitudeSpinner, ampDurationSpinner;
 	JButton exportButton;
 	JLabel skin;
 	JPanel screenPanel;
@@ -93,6 +93,9 @@ public class Frame {
 	JFileChooser fileChooser;
     int returnValue;
     File file = null;
+    JPanel keyboardPanel;
+    Main main;
+	   
 
 	/**
 	 * Launch the application.
@@ -283,22 +286,27 @@ public class Frame {
             	case 0:
             		getCurrentCanvas().setFinalTable(getCurrentCanvas().sawTable());
             		getCurrentCanvas().repaint();
+            		setFunctionOscillators();
             		break;
             	case 1:
             		getCurrentCanvas().setFinalTable(getCurrentCanvas().sineTable());
             		getCurrentCanvas().repaint();
+            		setFunctionOscillators();
             		break;
             	case 2:
             		getCurrentCanvas().setFinalTable(getCurrentCanvas().squareTable());
             		getCurrentCanvas().repaint();
+            		setFunctionOscillators();
             		break;
             	case 3:
             		getCurrentCanvas().setFinalTable(getCurrentCanvas().triangleTable());
             		getCurrentCanvas().repaint();
+            		setFunctionOscillators();
             		break;
             	case 4:
             		getCurrentCanvas().setFinalTable(getCurrentCanvas().noiseTable());
             		getCurrentCanvas().repaint();
+            		setFunctionOscillators();
             		break;
             	default:
             		System.out.println("unsupported comboBox index: " + comboBox.getSelectedIndex());
@@ -403,11 +411,23 @@ public class Frame {
         
         
 		skin = new JLabel("");
-		skin.setIcon(new ImageIcon(“res/GUI 12.png"));
+		skin.setIcon(new ImageIcon("res/GUI 12.png"));
 		skin.setBounds(0, 0, 914, 551);
 		frame.getContentPane().add(skin);
 		
+		//------------ Spinner Listeners ----------------------------------------
 		
+		ampDurationSpinner.getSpinner().addChangeListener(new ChangeListener(){
+
+			public void stateChanged(ChangeEvent e) {
+				double duration = secondsToHertz(ampDurationSpinner.getValue());
+				main.pitchFunctionOsc.frequency.set(duration);
+				main.filterFunctionOsc.frequency.set(duration);
+				main.ampFunctionOsc.frequency.set(duration);
+				
+				main.holdAdd.inputB.set(ampDurationSpinner.getValue());
+			}	
+		});
 		
 		filterTypeSpinner.getSpinner().addChangeListener(new ChangeListener(){
 
@@ -438,9 +458,36 @@ public class Frame {
 				{
 					pitchAmplitudeSpinner.setValue(max);
 				}
+				//main.pitchAmplitude = pitchAmplitudeSpinner.getValue();
 			}
 			
 		});
+		
+		
+		//--------------- Mouse Listeners for Canvases -------------------------------------
+		
+		
+		pitchCanvas.addMouseMotionListener(new MouseAdapter() {
+            public void mouseDragged(MouseEvent e) {
+            	setFunctionOscillators();        
+            }
+        
+        });
+		
+		filterCanvas.addMouseMotionListener(new MouseAdapter() {
+            public void mouseDragged(MouseEvent e) {
+            	setFunctionOscillators();      
+            }
+        
+        });
+		
+		ampCanvas.addMouseMotionListener(new MouseAdapter() {
+            public void mouseDragged(MouseEvent e) {
+            	setFunctionOscillators();          
+            }
+        
+        });
+		
 		
 		skin.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
@@ -484,6 +531,8 @@ public class Frame {
 	public void clear(){
 		getCurrentCanvas().clearCanvas();
 		getCurrentCanvas().repaint();
+		main.pitchFunctionOsc.function.set(new DoubleTable(pitchCanvas.getNormalizedTable()));
+		main.filterFunctionOsc.function.set(new DoubleTable(filterCanvas.getNormalizedTable()));
 	}
 	
 	
@@ -642,6 +691,8 @@ public class Frame {
 		return c.getNormalizedTable();
 	}
 	
+	
+	
 	public Canvas getCurrentCanvas(){
 		int index = tabbedPane.getSelectedIndex();
 		switch(index){
@@ -657,10 +708,10 @@ public class Frame {
 		default:
 			System.out.println("Frame.getCurrentCanvas() null");
 			return null;
-		}
-		
-		
+		}		
 	}
+	
+	
 	
 	public int getFilterType()
 	{
@@ -687,5 +738,22 @@ public class Frame {
 		double d1 = middleFrequency;
 		double d2 = 20000.0 - d1;
 		return Math.min(d1, d2);
+	}
+	
+	public void setMain(Main m){
+		main = m;
+	}
+	
+	public static double secondsToHertz(double seconds)
+	{
+		double hertz = 1/seconds;
+		return hertz;
+	}
+	
+	public void setFunctionOscillators()
+	{
+		main.pitchFunctionOsc.function.set(new DoubleTable(pitchCanvas.getNormalizedTable()));
+		main.filterFunctionOsc.function.set(new DoubleTable(filterCanvas.getNormalizedTable()));
+		main.ampFunctionOsc.function.set(new DoubleTable(ampCanvas.getNormalizedTable()));
 	}
 }
