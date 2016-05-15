@@ -29,12 +29,8 @@ import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 
 import javax.swing.BorderFactory;
-import javax.swing.BoundedRangeModel;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
 import javax.swing.JSlider;
 import javax.swing.SwingConstants;
 import javax.swing.JButton;
@@ -66,16 +62,21 @@ import javax.swing.GroupLayout.Alignment;
 import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
-<<<<<<< HEAD
 
-=======
-//import net.miginfocom.swing.MigLayout;
->>>>>>> origin/master
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.RowSpec;
 import com.jsyn.data.DoubleTable;
 import com.jsyn.unitgen.PowerOfTwo;
+import com.jsyn.unitgen.SawtoothOscillatorBL;
+import com.jsyn.unitgen.SineOscillator;
+import com.jsyn.unitgen.SquareOscillatorBL;
+import com.jsyn.unitgen.TriangleOscillator;
+import com.jsyn.util.VoiceAllocator;
+
+import javax.swing.JMenuBar;
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
 
 
 public class Frame {
@@ -85,43 +86,25 @@ public class Frame {
 	volatile boolean play = false;
 	JButton play_button, clear_button;
 	JTabbedPane tabbedPane;
-	JComboBox comboBox, oscillatorComboBox;
-	JLabel slot1Label, slot2Label, slot3Label, slot4Label;
-<<<<<<< HEAD
-	volatile DraggableSpinner filterTypeSpinner, filterResonanceSpinner, filterAmplitudeSpinner, filterFrequencySpinner;
-	volatile DraggableSpinner pitchFrequencySpinner, pitchAmplitudeSpinner, ampAmplitudeSpinner, ampDurationSpinner;
+	JComboBox oscillatorComboBox;
+	volatile DraggableSpinner ampDurationSpinner, frequencySpinner;
 	JButton exportButton;
 	JLabel skin;
-	JPanel screenPanel;
-=======
-	DraggableSpinner filterTypeSpinner, filterResonanceSpinner, filterAmplitudeSpinner, filterFrequencySpinner;
-	DraggableSpinner pitchFrequencySpinner, pitchAmplitudeSpinner, ampAmplitudeSpinner, ampDurationSpinner;
-	JKnob masterVolume_knob, pitch_knob;
-	RotaryController pitch_knob2;
-	private JButton exportButton;
-	private JLabel skin;
-	private JPanel screenPanel;
-	
->>>>>>> origin/master
 	JMenuBar menuBar;
 	JMenu menu;
 	JFileChooser fileChooser;
     int returnValue;
     File file = null;
-<<<<<<< HEAD
     JPanel keyboardPanel;
     Main main;
+    private JLabel sineButton;
+    private JLabel sawButton;
+    private JLabel squareButton;
+    private JLabel triangleButton;
+    private JLabel noiseButton;
+    
+    public Synth recorder;
 	   
-=======
-	
-	
-	JPanel keyboardPanel;
-	final int OCTAVES = 7; // change as desired
-	    
-	private WhiteKey[] whites = new WhiteKey [7 * OCTAVES + 1];
-	private BlackKey[] blacks = new BlackKey [5 * OCTAVES];
-	    
->>>>>>> origin/master
 
 	/**
 	 * Launch the application.
@@ -150,6 +133,9 @@ public class Frame {
 	 * Initialize the contents of the frame.
 	 */
 	private void initialize() {
+		recorder = new Synth();
+		recorder.setFrame(this);
+		
 		frame = new JFrame();
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);	
 		frame.setPreferredSize(new Dimension(914, 573));	
@@ -159,7 +145,7 @@ public class Frame {
 		
 		
 		tabbedPane = new JTabbedPane(JTabbedPane.TOP);
-		tabbedPane.setBounds(213, 52, 457, 306); // change width value (399) to 381 for canvas width to be 360 pixels
+		tabbedPane.setBounds(208, 49, 465, 312); // change width value (399) to 381 for canvas width to be 360 pixels
 		tabbedPane.setBackground(Color.LIGHT_GRAY);
 		frame.getContentPane().add(tabbedPane);
 
@@ -171,35 +157,34 @@ public class Frame {
 		
 						
 		pitchCanvas = new Canvas();
-		pitchCanvas.setBackground(Color.BLACK);
+		pitchCanvas.setBackground(Color.WHITE);
 		tabbedPane.addTab("Pitch", null, pitchCanvas, null);
 		
 		filterCanvas = new Canvas();
-		filterCanvas.setBackground(Color.BLACK);
+		filterCanvas.setBackground(Color.WHITE);
 		tabbedPane.addTab("Filter", null, filterCanvas, null);
 
 		
 		ampCanvas = new Canvas();
-		ampCanvas.setBackground(Color.BLACK);
+		ampCanvas.setBackground(Color.WHITE);
 		tabbedPane.addTab("Amplitude", null, ampCanvas, null);
 
 		
 		
 	    play_button = new JButton("Play");
-		play_button.setBounds(220, 387, 74, 29);
+		play_button.setBounds(225, 386, 74, 29);
 		frame.getContentPane().add(play_button);
-        play_button.addActionListener(new ActionListener() {
-        
-        	 
+		play_button.addActionListener(new ActionListener() {
+	       	 
             public void actionPerformed(ActionEvent e)
             {
-            	setPlay(true);
+            	recorder.init(false);
             }
-        }); 
+        });
 				
 		
 		clear_button = new JButton("Clear");
-		clear_button.setBounds(430, 387, 87, 29);
+		clear_button.setBounds(324, 386, 87, 29);
 		clear_button.addActionListener(new ActionListener() {
        	 
             public void actionPerformed(ActionEvent e)
@@ -208,176 +193,58 @@ public class Frame {
             }
         }); 
 		frame.getContentPane().add(clear_button);
-		clear_button.setVisible(false);
-		
-		
-		
-		masterVolume_knob = new JKnob();
-		masterVolume_knob.setBounds(55, 381, 100, 100);
-		frame.getContentPane().add(masterVolume_knob);
-		
-		
-		pitch_knob = new JKnob();
-		pitch_knob.setBounds(99, 381, 100, 100);
-		frame.getContentPane().add(pitch_knob);
-		 
-		
 		
 		
         
 	    ChangeListener changeListener = new ChangeListener() {
 	        public void stateChanged(ChangeEvent changeEvent) {
 	          JTabbedPane sourceTabbedPane = (JTabbedPane) changeEvent.getSource();
-	          int index = sourceTabbedPane.getSelectedIndex();
-	          setSpinners(index);	      
+	          int index = sourceTabbedPane.getSelectedIndex();     
 	          sourceTabbedPane.requestFocus();
 	        }
 	      };
 	    tabbedPane.addChangeListener(changeListener);
 	    
 	    exportButton = new JButton("Export");
-	    exportButton.setBounds(304, 387, 117, 29);
+	    exportButton.setBounds(618, 386, 117, 29);
 	    frame.getContentPane().add(exportButton);
-	    
-	    screenPanel = new JPanel();
-	    screenPanel.setBounds(89, 88, 282, 277);
-	    frame.getContentPane().add(screenPanel);
-	    screenPanel.setOpaque(false);
-        screenPanel.setBackground(new Color(0,0,0,0));
-        screenPanel.setLayout(null);
-        
-        
-        
-        keyboardPanel = new JPanel();
-        keyboardPanel.setBounds(68, 428, 1000, 300);
-	    frame.getContentPane().add(keyboardPanel);
-	    keyboardPanel.setOpaque(false);
-	    keyboardPanel.setBackground(new Color(0,0,0,0));
-	    keyboardPanel.setLayout(null);
-	    
-	    for (int i = 0; i < blacks.length; i++) {
-            blacks [i] = new BlackKey (i);
-            keyboardPanel.add (blacks [i]);
-            //blacks [i].addMouseListener (this);
-        }
-        for (int i = 0; i < whites.length; i++) {
-            whites [i] = new WhiteKey (i);
-            keyboardPanel.add (whites [i]);
-            //whites [i].addMouseListener (this);
-        }
-
-        
-        
-        
-        
-        
-        slot1Label = new JLabel("Filter");
-        slot1Label.setBounds(6, 6, 133, 14);
-        screenPanel.add(slot1Label);
-        slot1Label.setFont(new Font("Courier", Font.PLAIN, 13));
-        slot1Label.setForeground(Color.BLACK);
-        
-        slot2Label = new JLabel("Frequency");
-        slot2Label.setBounds(6, 40, 133, 14);
-        screenPanel.add(slot2Label);
-        slot2Label.setFont(new Font("Courier", Font.PLAIN, 13));
-        slot2Label.setForeground(Color.BLACK);
-        
-        slot3Label = new JLabel("Amplitude");
-        slot3Label.setBounds(6, 74, 133, 14);
-        screenPanel.add(slot3Label);
-        slot3Label.setFont(new Font("Courier", Font.PLAIN, 13));
-        slot3Label.setForeground(Color.BLACK);
-        
-        slot4Label = new JLabel("Resonance");
-        slot4Label.setBounds(6, 108, 133, 14);
-        screenPanel.add(slot4Label);
-        slot4Label.setFont(new Font("Courier", Font.PLAIN, 13));
-        slot4Label.setForeground(Color.BLACK);
-		
-		filterResonanceSpinner = new DraggableSpinner(0.0, 0.0, 0.0, 0.0, true, false);
-		filterResonanceSpinner.setBounds(0, 108, 125, 16);
-		screenPanel.add(filterResonanceSpinner);
-		
-		
-		filterFrequencySpinner = new DraggableSpinner(20000.0, 20.0, 20000.0, 10.0, true, false);
-		filterFrequencySpinner.setBounds(0, 40, 125, 16);
-		screenPanel.add(filterFrequencySpinner);
-		filterFrequencySpinner.getSpinner().setLocation(0, 0);
-		filterFrequencySpinner.setUnits("Hz");
-		
-		filterAmplitudeSpinner = new DraggableSpinner(0.0, 0.0, validMaxValue(filterFrequencySpinner.getValue()), 10.0, true, false);
-		filterAmplitudeSpinner.setBounds(0, 74, 122, 16);
-		screenPanel.add(filterAmplitudeSpinner);
-		
-		
-		filterTypeSpinner = new DraggableSpinner(0.0, 0.0, 0.0, 0.0, true, true);
-		filterTypeSpinner.setBounds(0, 6, 125, 16);
-		screenPanel.add(filterTypeSpinner);
-		
-		pitchFrequencySpinner = new DraggableSpinner(800.0, 20.0, 20000.0, 10.0, true, false);
-		pitchFrequencySpinner.setBounds(0, 6, 125, 16);
-		screenPanel.add(pitchFrequencySpinner);
-		pitchFrequencySpinner.setUnits("Hz");
-		
-		pitchAmplitudeSpinner = new DraggableSpinner(0.0, 0.0, validMaxValue(pitchFrequencySpinner.getValue()), 10.0, true, false);
-		pitchAmplitudeSpinner.setBounds(0, 40, 125, 16);
-		screenPanel.add(pitchAmplitudeSpinner);
-		
-		ampAmplitudeSpinner = new DraggableSpinner(0.2, 0.0, 0.5, 0.1, true, false);
-		ampAmplitudeSpinner.setBounds(0, 6, 125, 16);
-		screenPanel.add(ampAmplitudeSpinner);
-		
-		ampDurationSpinner = new DraggableSpinner(1.0, 0.5, 5.0, 0.1, true, false);
-		ampDurationSpinner.setBounds(0, 40, 125, 16);
-		screenPanel.add(ampDurationSpinner);
-		ampDurationSpinner.setUnits("sec");
-		
-		
-		comboBox = new JComboBox();
-		comboBox.setModel(new DefaultComboBoxModel(new String[] {
-				"Sawtooth", "Sine", "Square", "Triangle", "Noise"}));
-		comboBox.setBounds(561, 387, 114, 28);
-		frame.getContentPane().add(comboBox);
-        comboBox.addActionListener(new ActionListener() {
-       	 
+	    exportButton.addActionListener(new ActionListener() {
+	       	 
             public void actionPerformed(ActionEvent e)
             {
-            	JComboBox comboBox = (JComboBox)e.getSource();
-            	switch(comboBox.getSelectedIndex())
-            	{
-            	case 0:
-            		getCurrentCanvas().setFinalTable(getCurrentCanvas().sawTable());
-            		getCurrentCanvas().repaint();
-            		setFunctionOscillators();
-            		break;
-            	case 1:
-            		getCurrentCanvas().setFinalTable(getCurrentCanvas().sineTable());
-            		getCurrentCanvas().repaint();
-            		setFunctionOscillators();
-            		break;
-            	case 2:
-            		getCurrentCanvas().setFinalTable(getCurrentCanvas().squareTable());
-            		getCurrentCanvas().repaint();
-            		setFunctionOscillators();
-            		break;
-            	case 3:
-            		getCurrentCanvas().setFinalTable(getCurrentCanvas().triangleTable());
-            		getCurrentCanvas().repaint();
-            		setFunctionOscillators();
-            		break;
-            	case 4:
-            		getCurrentCanvas().setFinalTable(getCurrentCanvas().noiseTable());
-            		getCurrentCanvas().repaint();
-            		setFunctionOscillators();
-            		break;
-            	default:
-            		System.out.println("unsupported comboBox index: " + comboBox.getSelectedIndex());
-            	}
+            	recorder.init(true);
             }
         });
+	    
+	    ampDurationSpinner = new DraggableSpinner(1.0, 0.5, 5.0, 0.1, true, false);
+	    ampDurationSpinner.setBackground(Color.WHITE);
+	    ampDurationSpinner.setForeground(Color.WHITE);
+	    ampDurationSpinner.setBounds(65, 399, 125, 16);
+	    frame.getContentPane().add(ampDurationSpinner);
+	    ampDurationSpinner.setUnits("sec");
+	    
+	    //------------ Spinner Listeners ----------------------------------------
+	    
+	    ampDurationSpinner.getSpinner().addChangeListener(new ChangeListener(){
+
+	    	public void stateChanged(ChangeEvent e) {
+	    		double duration = getDuration();
+	    		main.pitchFunctionOsc.frequency.set(duration);
+	    		main.filterFunctionOsc.frequency.set(duration);
+	    		main.ampFunctionOsc.frequency.set(duration);
+	    		
+	    		main.holdAdd.inputB.set(ampDurationSpinner.getValue());
+	    	}	
+	    });
 		
- fileChooser = new JFileChooser();
+		
+        
+        fileChooser = new JFileChooser();
+        
+        frequencySpinner = new DraggableSpinner(440.0, 10.0, 20000.0, 10.0, true, false);
+        frequencySpinner.setUnits("Hz");
+        frequencySpinner.setBounds(82, 465, 117, 16);
+        frame.getContentPane().add(frequencySpinner);
         
         
         menuBar = new JMenuBar();
@@ -469,55 +336,62 @@ public class Frame {
 			}
 			
 		});
+		
+		sineButton = new JLabel("");
+		sineButton.setBounds(674, 49, 40, 33);
+		frame.getContentPane().add(sineButton);
+		sineButton.addMouseListener(new MouseAdapter() {
+			public void mouseClicked(MouseEvent e) {
+				setWaveform(1);
+				super.mouseClicked(e);
+			}
+		});
+		
+		sawButton = new JLabel("");
+		sawButton.setBounds(711, 49, 40, 33);
+		frame.getContentPane().add(sawButton);
+		sawButton.addMouseListener(new MouseAdapter() {
+			public void mouseClicked(MouseEvent e) {
+				setWaveform(0);
+				super.mouseClicked(e);
+			}
+		});
+		
+		squareButton = new JLabel("");
+		squareButton.setBounds(674, 83, 40, 39);
+		frame.getContentPane().add(squareButton);
+		squareButton.addMouseListener(new MouseAdapter() {
+			public void mouseClicked(MouseEvent e) {
+				setWaveform(2);
+				super.mouseClicked(e);
+			}
+		});
+		
+		triangleButton = new JLabel("");
+		triangleButton.setBounds(711, 83, 40, 39);
+		frame.getContentPane().add(triangleButton);
+		triangleButton.addMouseListener(new MouseAdapter() {
+			public void mouseClicked(MouseEvent e) {
+				setWaveform(3);
+				super.mouseClicked(e);
+			}
+		});
+		
+		noiseButton = new JLabel("");
+		noiseButton.setBounds(674, 121, 40, 33);
+		frame.getContentPane().add(noiseButton);
+		noiseButton.addMouseListener(new MouseAdapter() {
+			public void mouseClicked(MouseEvent e) {
+				setWaveform(4);
+				super.mouseClicked(e);
+			}
+		});
+        
+        
 		skin = new JLabel("");
-<<<<<<< HEAD
-		skin.setIcon(new ImageIcon("res/GUI 12.png"));
-=======
-		skin.setIcon(new ImageIcon("res/GUI 13.png"));
->>>>>>> origin/master
+		skin.setIcon(new ImageIcon("/Users/London/Documents/workspace/SynthStroke2/res/GUI 13.png"));
 		skin.setBounds(0, 0, 914, 551);
 		frame.getContentPane().add(skin);
-		
-		//------------ Spinner Listeners ----------------------------------------
-		
-		ampDurationSpinner.getSpinner().addChangeListener(new ChangeListener(){
-
-			public void stateChanged(ChangeEvent e) {
-				double duration = secondsToHertz(ampDurationSpinner.getValue());
-				main.pitchFunctionOsc.frequency.set(duration);
-				main.filterFunctionOsc.frequency.set(duration);
-				main.ampFunctionOsc.frequency.set(duration);
-				
-				main.holdAdd.inputB.set(ampDurationSpinner.getValue());
-			}	
-		});
-		
-		filterFrequencySpinner.getSpinner().addChangeListener(new ChangeListener(){
-
-			public void stateChanged(ChangeEvent e) {
-				double max = validMaxValue(filterFrequencySpinner.getValue());
-				filterAmplitudeSpinner.setMax(max);
-				if(filterAmplitudeSpinner.getValue() > max)
-				{
-					filterAmplitudeSpinner.setValue(max);
-				}
-			}	
-		});
-		
-		
-		pitchFrequencySpinner.getSpinner().addChangeListener(new ChangeListener(){
-
-			public void stateChanged(ChangeEvent e) {
-				double max = validMaxValue(pitchFrequencySpinner.getValue());
-				pitchAmplitudeSpinner.setMax(max);
-				if(pitchAmplitudeSpinner.getValue() > max)
-				{
-					pitchAmplitudeSpinner.setValue(max);
-				}
-				//main.pitchAmplitude = pitchAmplitudeSpinner.getValue();
-			}
-			
-		});
 		
 		
 		//--------------- Mouse Listeners for Canvases -------------------------------------
@@ -554,11 +428,6 @@ public class Frame {
 
 		
 		
-		
-		
-		setSpinners(0);
-
-		
 		// must call pack before setting canvases
 		frame.pack();
 		
@@ -585,144 +454,18 @@ public class Frame {
 	}
 	
 	public void clear(){
-		getCurrentCanvas().clearCanvas();
-		getCurrentCanvas().repaint();
-		main.pitchFunctionOsc.function.set(new DoubleTable(pitchCanvas.getNormalizedTable()));
-		main.filterFunctionOsc.function.set(new DoubleTable(filterCanvas.getNormalizedTable()));
-	}
-	
-	
-	public void setSpinners(int index){
-		switch(index){
-		
-		case 0: //waveform
-										
-			clear_button.setVisible(false);
-			
-			try { // make the program less responsive (L&F)
-				Thread.sleep(150);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-			
-			slot1Label.setText("Choose Waveform");
-			slot2Label.setText("");
-			slot3Label.setText("");
-			slot4Label.setText("");
-			
-			pitchFrequencySpinner.setVisible(false);
-			pitchAmplitudeSpinner.setVisible(false);
-			
-			filterTypeSpinner.setVisible(false);
-			filterResonanceSpinner.setVisible(false);
-			filterAmplitudeSpinner.setVisible(false);
-			filterFrequencySpinner.setVisible(false);
-			
-			ampAmplitudeSpinner.setVisible(false);
-			ampDurationSpinner.setVisible(false);
-			
-			comboBox.setVisible(false);
-			
-			
-			break;
-			
-		case 1: //pitch
-						
-			try {
-				Thread.sleep(150);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-			
-			
-			clear_button.setVisible(true);
-			
-			slot1Label.setText("Frequency");
-			slot2Label.setText("Amplitude");
-			slot3Label.setText("");
-			slot4Label.setText("");
-			
-			pitchFrequencySpinner.setVisible(true);
-			pitchAmplitudeSpinner.setVisible(true);
-			
-			filterTypeSpinner.setVisible(false);
-			filterResonanceSpinner.setVisible(false);
-			filterAmplitudeSpinner.setVisible(false);
-			filterFrequencySpinner.setVisible(false);
-			
-			ampAmplitudeSpinner.setVisible(false);
-			ampDurationSpinner.setVisible(false);
-			
-			comboBox.setVisible(true);
-			
-			break;			
-		
-		case 2: //filter
-			
-			try {
-				Thread.sleep(150);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-						
-			clear_button.setVisible(true);
-			
-			slot1Label.setText("Filter");
-			slot2Label.setText("Frequency");
-			slot3Label.setText("Amplitude");
-			slot4Label.setText("Resonance");
-			
-			pitchFrequencySpinner.setVisible(false);
-			pitchAmplitudeSpinner.setVisible(false);
-			
-			filterTypeSpinner.setVisible(true);
-			filterResonanceSpinner.setVisible(true);
-			filterAmplitudeSpinner.setVisible(true);
-			filterFrequencySpinner.setVisible(true);
-			
-			ampAmplitudeSpinner.setVisible(false);
-			ampDurationSpinner.setVisible(false);
-			
-			comboBox.setVisible(true);
-			
-			break;	
-			
-		case 3: // amp
-			
-			try {
-				Thread.sleep(100);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-			
-			clear_button.setVisible(true);
-			
-			slot1Label.setText("Amplitude");
-			slot2Label.setText("Duration");
-			slot3Label.setText("");
-			slot4Label.setText("");
-			
-			pitchFrequencySpinner.setVisible(false);
-			pitchAmplitudeSpinner.setVisible(false);
-			
-			filterTypeSpinner.setVisible(false);
-			filterResonanceSpinner.setVisible(false);
-			filterAmplitudeSpinner.setVisible(false);
-			filterFrequencySpinner.setVisible(false);
-			
-			ampAmplitudeSpinner.setVisible(true);
-			ampDurationSpinner.setVisible(true);
-			
-			comboBox.setVisible(true);
-			
-			break;
-		
-		default: 
-			
-			System.out.println("Something went wrong in Frame.setSpinners()");
-		
+		Canvas canvas = getCurrentCanvas();
+		if(canvas != null)
+		{
+			getCurrentCanvas().clearCanvas();
+			getCurrentCanvas().repaint();
+			main.pitchFunctionOsc.function.set(new DoubleTable(pitchCanvas.getNormalizedTable()));
+			main.filterFunctionOsc.function.set(new DoubleTable(filterCanvas.getNormalizedTable()));
+			main.ampFunctionOsc.function.set(new DoubleTable(filterCanvas.getNormalizedTable()));
 		}
 	}
+	
+	
 	
 	
 	// returns canvas table
@@ -749,30 +492,6 @@ public class Frame {
 			return null;
 		}		
 	}
-<<<<<<< HEAD
-	
-	
-	
-	public int getFilterType()
-	{
-		int type;
-		String string = (String)filterTypeSpinner.spinner.getValue();
-		if(string == "none"){
-			type = 0;
-		}else if(string == "lowpass"){
-			type = 1;
-		}else if(string == "bandpass"){
-			type = 2;
-		}else if(string == "highpass"){
-			type = 3;
-		}else{
-			type = 0;
-			System.out.println("Something went wrong in Frame.getFilterType(), filter type = " + string);
-		}
-		return type;
-	}
-=======
->>>>>>> origin/master
 
 	
 	// returns a valid maximum value for a spinner given a middle frequency
@@ -782,7 +501,6 @@ public class Frame {
 		return Math.min(d1, d2);
 	}
 	
-<<<<<<< HEAD
 	public void setMain(Main m){
 		main = m;
 	}
@@ -798,60 +516,48 @@ public class Frame {
 		main.pitchFunctionOsc.function.set(new DoubleTable(pitchCanvas.getNormalizedTable()));
 		main.filterFunctionOsc.function.set(new DoubleTable(filterCanvas.getNormalizedTable()));
 		main.ampFunctionOsc.function.set(new DoubleTable(ampCanvas.getNormalizedTable()));
-=======
-	interface Key {
-	    // change WD to suit your screen
-	    int WD = 10;
-	    int HT = (WD * 9) / 2;
-	    // change baseNote for starting octave
-	    // multiples of 16 only
-	    int baseNote = 48;
-
-	    int getNote ();
 	}
-
-
-	class BlackKey extends JButton implements Key {
-
-	    final int note;
-
-	    public BlackKey (int pos) {
-	        note = baseNote + 1 + 2 * pos + (pos + 3) / 5 + pos / 5;
-	        int left = 10 + WD
-	                + ((WD * 3) / 2) * (pos + (pos / 5)
-	                + ((pos + 3) / 5));
-	        setBackground (Color.BLACK);
-	        setBounds (left, 10, WD, HT);
-	    }
-
-	    public int getNote () {
-	        return note;
-	    }
+	
+	public void setWaveform(int i)
+	{
+		Canvas canvas = getCurrentCanvas();
+		if(canvas != null)
+		{
+			switch(i)
+	    	{
+	    	case 0: // saw
+	    		canvas.setFinalTable(canvas.sawTable());
+	    		canvas.repaint();
+	    		setFunctionOscillators();
+	    		break;
+	    	case 1: // sine
+	    		canvas.setFinalTable(canvas.sineTable());
+	    		canvas.repaint();
+	    		setFunctionOscillators();
+	    		break;
+	    	case 2: // square
+	    		canvas.setFinalTable(canvas.squareTable());
+	    		canvas.repaint();
+	    		setFunctionOscillators();
+	    		break;
+	    	case 3: // triangle
+	    		canvas.setFinalTable(canvas.triangleTable());
+	    		canvas.repaint();
+	    		setFunctionOscillators();
+	    		break;
+	    	case 4: // noise
+	    		canvas.setFinalTable(canvas.noiseTable());
+	    		canvas.repaint();
+	    		setFunctionOscillators();
+	    		break;
+	    	default:
+	    		System.out.println("setWaveform(); unsupported waveform index: " + i);
+	    	}
+		}
 	}
-
-
-	class WhiteKey  extends JButton implements Key {
-
-	      int WWD = (WD * 3) / 2;
-	      int WHT = (HT * 3) / 2;
-	    final int note;
-
-	    public WhiteKey (int pos) {
-
-	        note = baseNote + 2 * pos
-	                - (pos + 4) / 7
-	                - pos / 7;
-	        int left = 10 + WWD * pos;
-	        // I think metal looks better!
-	        //setBackground (Color.WHITE);
-	        setBounds (left, 10, WWD, WHT);
-
-	    }
-
-	    public int getNote () {
-	        return note;
-	    }
->>>>>>> origin/master
+	
+	public double getDuration()
+	{
+		return secondsToHertz(ampDurationSpinner.getValue());
 	}
 }
-

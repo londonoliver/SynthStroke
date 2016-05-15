@@ -19,8 +19,8 @@ import com.softsynth.shared.time.TimeStamp;
  */
 public class SynthVoice extends Circuit implements UnitVoice {
     private static final long serialVersionUID = -2704222221111608377L;
-    private UnitOscillator osc;
-    private FilterLowPass filter;
+    public UnitOscillator osc;  // made public, used to be private
+    public FilterLowPass filter; // made public, was private
     private EnvelopeDAHDSR ampEnv;
     private Add cutoffAdder;
     private Multiply frequencyScaler;
@@ -119,9 +119,9 @@ public class SynthVoice extends Circuit implements UnitVoice {
             case 0:
             	ampEnv.sustain.set(0.0);
                 ampEnv.attack.set(0.01);
-                ampEnv.hold.set(1.0);
-                ampEnv.decay.set(0.2);
-                cutoff.set(500.0);
+                ampEnv.hold.set(duration.getValue() - 0.03);
+                ampEnv.decay.set(0.02);
+                cutoff.set(800.0);
                 filter.Q.set(1.0);
                 break;
             case 1:

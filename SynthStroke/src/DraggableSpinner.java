@@ -7,6 +7,7 @@ import javax.swing.JPanel;
 import javax.swing.SpinnerListModel;
 import javax.swing.SpinnerModel;
 import javax.swing.SpinnerNumberModel;
+import javax.swing.border.Border;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -63,7 +64,6 @@ public class DraggableSpinner extends JPanel implements MouseListener, MouseMoti
 	public DraggableSpinner(double value, double min, double max, double step, boolean vert, boolean text) {
 		vertical = vert;
 		this.text = text;
-		//this.setBorder(javax.swing.BorderFactory.createLineBorder(Color.black));
 		
 		requestFocus();
 		setLayout(null);
@@ -88,8 +88,7 @@ public class DraggableSpinner extends JPanel implements MouseListener, MouseMoti
 
 		
 		textField.setFont(new Font("Courier", Font.PLAIN, 13));
-		textField.setForeground(Color.darkGray);
-		//textField.setBackground(Color.pink);
+		textField.setForeground(Color.white);
 		
 		
 		if(text){
@@ -134,7 +133,7 @@ public class DraggableSpinner extends JPanel implements MouseListener, MouseMoti
 		
 		units = new JLabel();
 		units.setFont(new Font("Courier", Font.PLAIN, 13));
-		units.setForeground(Color.darkGray);
+		units.setForeground(Color.white);
 		units.setBounds(78, 0, 24, 16);
 		add(units);
 		units.addMouseListener(new MouseAdapter(){
@@ -150,7 +149,7 @@ public class DraggableSpinner extends JPanel implements MouseListener, MouseMoti
 		});
 		
 		button = new JLabel();
-		button.setIcon(new ImageIcon("res/vertical spinner.png"));
+		button.setIcon(new ImageIcon("res/vertical_spinner_white.png"));
 		button.setCursor(Cursor.getPredefinedCursor(Cursor.N_RESIZE_CURSOR));
 		button.setBounds(110, 0, 8, 16);
 		add(button);

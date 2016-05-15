@@ -27,19 +27,19 @@ import com.softsynth.shared.time.TimeStamp;
  * @author Phil Burk (C) 2010 Mobileer Inc
  */
 public class Main {
-    private static final int MAX_VOICES = 8;
-    private Synthesizer synth;
-    private VoiceAllocator allocator;
-    private LineOut lineOut;
-    private double vibratoRate = 5.0;
-    private double vibratoDepth = 0.0;
+    public static final int MAX_VOICES = 8;
+    public Synthesizer synth; 
+    public VoiceAllocator allocator;
+    public LineOut lineOut;
+    public double vibratoRate = 5.0;
+    public double vibratoDepth = 0.0;
 
-    private UnitOscillator lfo;
-    private PowerOfTwo pitchPowerOfTwo;
-    private PowerOfTwo filterPowerOfTwo;
-    private PowerOfTwo ampPowerOfTwo;
-    private MessageParser messageParser;
-    private SynthVoice[] voices;
+    public UnitOscillator lfo;
+    public PowerOfTwo pitchPowerOfTwo;
+    public PowerOfTwo filterPowerOfTwo;
+    public PowerOfTwo ampPowerOfTwo;
+    public MessageParser messageParser;
+    public SynthVoice[] voices; // made public, used to be private
     
     
     volatile Frame frame;
@@ -63,12 +63,10 @@ public class Main {
 
     
     volatile double duration;
-    volatile double hold = 1.0;
+    volatile double hold;
     volatile Add holdAdd;
-    
 
-    
-    
+       
     
     
 
@@ -135,6 +133,7 @@ public class Main {
             double amplitude = velocity / (4 * 128.0);           
             pitchFunctionOsc.phase.setValue(-1);
             filterFunctionOsc.phase.setValue(-1);
+            ampFunctionOsc.phase.setValue(-1);
             TimeStamp timeStamp = synth.createTimeStamp();
             allocator.noteOn(noteNumber, frequency, amplitude, timeStamp);
         }
@@ -162,13 +161,18 @@ public class Main {
         // Add an output.
         synth.add(lineOut = new LineOut());
         
-        duration = 0.9;
+        
         cutoff = 800.0;
         Q = .9;
         
         
+        
         frame = new Frame();
         frame.setMain(this);
+        
+        duration = frame.getDuration();
+        hold = frame.ampDurationSpinner.getValue();
+        
         
         // --------- Pitch Stuff --------------------------------
         
@@ -210,7 +214,7 @@ public class Main {
         synth.add(ampFunctionOsc);
         
         ampFunctionOsc.output.connect(ampPowerOfTwo.input);
-        ampFunctionOsc.amplitude.set(0.2);
+        ampFunctionOsc.amplitude.set(1.0);
         ampFunctionOsc.frequency.set(duration);
         
         // ---------- Duration Stuff -------------------------------
@@ -261,6 +265,6 @@ public class Main {
     
     public double calculateHold(double d)
     {
-    	return d;
+    	return d - 0.03;
     }
 }
