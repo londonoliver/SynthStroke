@@ -169,6 +169,7 @@ public class Main {
         
         frame = new Frame();
         frame.setMain(this);
+        frame.getMidiPiano().setMain(this);
         
         duration = frame.getDuration();
         hold = frame.ampDurationSpinner.getValue();

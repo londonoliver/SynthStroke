@@ -102,6 +102,7 @@ public class Frame {
     private JLabel squareButton;
     private JLabel triangleButton;
     private JLabel noiseButton;
+    public MidiPiano midiPiano;
     
     public Synth recorder;
 	   
@@ -243,7 +244,7 @@ public class Frame {
         
         frequencySpinner = new DraggableSpinner(440.0, 10.0, 20000.0, 10.0, true, false);
         frequencySpinner.setUnits("Hz");
-        frequencySpinner.setBounds(82, 465, 117, 16);
+        frequencySpinner.setBounds(455, 386, 117, 16);
         frame.getContentPane().add(frequencySpinner);
         
         
@@ -386,6 +387,10 @@ public class Frame {
 				super.mouseClicked(e);
 			}
 		});
+		
+		midiPiano = new MidiPiano();
+		midiPiano.setBounds(51, 436, 815, 109);
+		frame.getContentPane().add(midiPiano);
         
         
 		skin = new JLabel("");
@@ -559,5 +564,10 @@ public class Frame {
 	public double getDuration()
 	{
 		return secondsToHertz(ampDurationSpinner.getValue());
+	}
+	
+	public MidiPiano getMidiPiano()
+	{
+		return midiPiano;
 	}
 }
