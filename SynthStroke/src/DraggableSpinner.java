@@ -169,7 +169,6 @@ public class DraggableSpinner extends JPanel implements MouseListener, MouseMoti
 		button.addMouseMotionListener(this);
 		
 		makeTransparent(this);
-
 	}
 	
 	boolean enabled;

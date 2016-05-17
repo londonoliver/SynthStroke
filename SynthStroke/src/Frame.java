@@ -26,6 +26,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 
 import javax.swing.BorderFactory;
@@ -86,7 +87,6 @@ public class Frame {
 	volatile boolean play = false;
 	JButton play_button, clear_button;
 	JTabbedPane tabbedPane;
-	JComboBox oscillatorComboBox;
 	volatile DraggableSpinner ampDurationSpinner, frequencySpinner;
 	JButton exportButton;
 	JLabel skin;
@@ -149,12 +149,7 @@ public class Frame {
 		tabbedPane.setBounds(208, 49, 465, 312); // change width value (399) to 381 for canvas width to be 360 pixels
 		tabbedPane.setBackground(Color.LIGHT_GRAY);
 		frame.getContentPane().add(tabbedPane);
-
 		
-		oscillatorComboBox = new JComboBox();
-		oscillatorComboBox.setModel(new DefaultComboBoxModel(new String[] {"Sawtooth", "Sine", "Square", "Triangle", "Noise"}));
-		tabbedPane.addTab("Oscillator", null, oscillatorComboBox, null);
-
 		
 						
 		pitchCanvas = new Canvas();
@@ -171,9 +166,8 @@ public class Frame {
 		tabbedPane.addTab("Amplitude", null, ampCanvas, null);
 
 		
-		
 	    play_button = new JButton("Play");
-		play_button.setBounds(225, 386, 74, 29);
+		play_button.setBounds(228, 386, 74, 29);
 		frame.getContentPane().add(play_button);
 		play_button.addActionListener(new ActionListener() {
 	       	 
@@ -185,7 +179,7 @@ public class Frame {
 				
 		
 		clear_button = new JButton("Clear");
-		clear_button.setBounds(324, 386, 87, 29);
+		clear_button.setBounds(314, 386, 87, 29);
 		clear_button.addActionListener(new ActionListener() {
        	 
             public void actionPerformed(ActionEvent e)
@@ -206,8 +200,10 @@ public class Frame {
 	      };
 	    tabbedPane.addChangeListener(changeListener);
 	    
+	   
+	    
 	    exportButton = new JButton("Export");
-	    exportButton.setBounds(618, 386, 117, 29);
+	    exportButton.setBounds(641, 386, 91, 29);
 	    frame.getContentPane().add(exportButton);
 	    exportButton.addActionListener(new ActionListener() {
 	       	 
@@ -220,7 +216,7 @@ public class Frame {
 	    ampDurationSpinner = new DraggableSpinner(1.0, 0.5, 5.0, 0.1, true, false);
 	    ampDurationSpinner.setBackground(Color.WHITE);
 	    ampDurationSpinner.setForeground(Color.WHITE);
-	    ampDurationSpinner.setBounds(65, 399, 125, 16);
+	    ampDurationSpinner.setBounds(731, 386, 125, 16);
 	    frame.getContentPane().add(ampDurationSpinner);
 	    ampDurationSpinner.setUnits("sec");
 	    
@@ -244,7 +240,7 @@ public class Frame {
         
         frequencySpinner = new DraggableSpinner(440.0, 10.0, 20000.0, 10.0, true, false);
         frequencySpinner.setUnits("Hz");
-        frequencySpinner.setBounds(455, 386, 117, 16);
+        frequencySpinner.setBounds(67, 386, 117, 16);
         frame.getContentPane().add(frequencySpinner);
         
         
@@ -389,7 +385,7 @@ public class Frame {
 		});
 		
 		midiPiano = new MidiPiano();
-		midiPiano.setBounds(51, 436, 815, 109);
+		midiPiano.setBounds(51, 421, 815, 99);
 		frame.getContentPane().add(midiPiano);
         
         
@@ -484,13 +480,10 @@ public class Frame {
 		int index = tabbedPane.getSelectedIndex();
 		switch(index){
 		case 0:
-			System.out.println("No waveform canvas, return null");
-			return null;
-		case 1:
 			return pitchCanvas;
-		case 2:
+		case 1:
 			return filterCanvas;
-		case 3:
+		case 2:
 			return ampCanvas;
 		default:
 			System.out.println("Frame.getCurrentCanvas() null");

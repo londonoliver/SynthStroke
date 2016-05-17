@@ -6,6 +6,8 @@ import javax.sound.midi.MidiSystem;
 import javax.sound.midi.MidiUnavailableException;
 import javax.sound.midi.Synthesizer;
 import javax.swing.*;
+import javax.swing.border.Border;
+import javax.swing.border.SoftBevelBorder;
 
 import com.softsynth.shared.time.TimeStamp;
 
@@ -25,18 +27,18 @@ public class MidiPiano extends JPanel implements MouseListener {
 
     public void mousePressed (MouseEvent e) {
         Key key = (Key) e.getSource ();
-        int noteNumber = key.getNote();
+        int noteNumber = key.getNote() - 24;
         double frequency = main.convertPitchToFrequency(noteNumber);
         TimeStamp timeStamp = main.synth.createTimeStamp();
         main.pitchFunctionOsc.phase.setValue(-1);
         main.filterFunctionOsc.phase.setValue(-1);
         main.ampFunctionOsc.phase.setValue(-1);
-        main.allocator.noteOn(noteNumber, frequency, 0.2, timeStamp);
+        main.allocator.noteOn(noteNumber, frequency, 0.247, timeStamp);
     }
 
     public void mouseReleased (MouseEvent e) {
         Key key = (Key) e.getSource ();
-        int noteNumber = key.getNote();
+        int noteNumber = key.getNote() - 24;
         main.allocator.noteOff(noteNumber, main.synth.createTimeStamp());
     }
 
@@ -78,7 +80,12 @@ public class MidiPiano extends JPanel implements MouseListener {
             contentPane.add (whites [i]);
             whites [i].addMouseListener (this);
         }
+        contentPane.setBackground(new Color(65, 104, 160));
+        FlowLayout layout = (FlowLayout)this.getLayout();
+        layout.setVgap(0);
         add(contentPane);
+        this.setBackground(new Color(65, 104, 160));
+        
     }
 
     public static void main (String[] args) {
@@ -116,8 +123,11 @@ class BlackKey extends JButton implements Key {
         int left = 10 + WD
                 + ((WD * 3) / 2) * (pos + (pos / 5)
                 + ((pos + 3) / 5));
+        setBorderPainted(false);
+        setOpaque(true);
         setBackground (Color.BLACK);
         setBounds (left, 10, WD, HT);
+        
     }
 
     public int getNote () {
@@ -138,10 +148,8 @@ class WhiteKey  extends JButton implements Key {
                 - (pos + 4) / 7
                 - pos / 7;
         int left = 10 + WWD * pos;
-        // I think metal looks better!
         setBackground (Color.WHITE);
         setBounds (left, 10, WWD, WHT);
-
     }
 
     public int getNote () {
