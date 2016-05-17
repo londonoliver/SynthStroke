@@ -390,7 +390,7 @@ public class Frame {
         
         
 		skin = new JLabel("");
-		skin.setIcon(new ImageIcon("/Users/London/Documents/workspace/SynthStroke2/res/GUI 13.png"));
+		skin.setIcon(new ImageIcon("res/GUI 13.png"));
 		skin.setBounds(0, 0, 914, 551);
 		frame.getContentPane().add(skin);
 		
