@@ -1,54 +1,10 @@
-import java.awt.Component;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.EventQueue;
-import java.awt.Insets;
-import java.awt.Toolkit;
-
-import javax.swing.JFrame;
-import javax.swing.JTabbedPane;
-
-import java.awt.Color;
-
-import javax.swing.UIManager;
-
-import java.awt.FlowLayout;
-
-import javax.swing.JPanel;
-import javax.swing.border.BevelBorder;
-import javax.swing.border.LineBorder;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-
-import java.awt.BorderLayout;
-import java.awt.color.ColorSpace;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.image.BufferedImage;
-
-import javax.swing.BorderFactory;
-import javax.swing.JComponent;
-import javax.swing.JFileChooser;
-import javax.swing.JSlider;
-import javax.swing.SwingConstants;
-import javax.swing.JButton;
-import javax.swing.JTextField;
-import javax.swing.JSpinner;
-import javax.swing.JSeparator;
-import javax.swing.JLabel;
-import javax.swing.ImageIcon;
-import javax.swing.JToggleButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
-import javax.swing.DefaultComboBoxModel;
-
-import java.awt.Font;
-import java.awt.GridLayout;
-import java.awt.GridBagLayout;
-import java.awt.GridBagConstraints;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -56,28 +12,19 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-
-import javax.swing.JRadioButton;
-import javax.swing.GroupLayout;
-import javax.swing.GroupLayout.Alignment;
-import javax.swing.LayoutStyle.ComponentPlacement;
-import javax.swing.JScrollPane;
-import javax.swing.ScrollPaneConstants;
-
-import com.jgoodies.forms.layout.FormLayout;
-import com.jgoodies.forms.layout.ColumnSpec;
-import com.jgoodies.forms.layout.RowSpec;
-import com.jsyn.data.DoubleTable;
-import com.jsyn.unitgen.PowerOfTwo;
-import com.jsyn.unitgen.SawtoothOscillatorBL;
-import com.jsyn.unitgen.SineOscillator;
-import com.jsyn.unitgen.SquareOscillatorBL;
-import com.jsyn.unitgen.TriangleOscillator;
-import com.jsyn.util.VoiceAllocator;
-
-import javax.swing.JMenuBar;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JMenu;
+import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JPanel;
+import javax.swing.JTabbedPane;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import com.jsyn.data.DoubleTable;
 
 
 public class Frame {
@@ -243,7 +190,8 @@ public class Frame {
         frequencySpinner.setBounds(67, 386, 117, 16);
         frame.getContentPane().add(frequencySpinner);
         
-        
+        // For menu bar, not currently functional
+        /*
         menuBar = new JMenuBar();
 		menuBar.setBounds(0, 0, 914, 22);
 		frame.getContentPane().add(menuBar);
@@ -333,6 +281,7 @@ public class Frame {
 			}
 			
 		});
+		*/
 		
 		sineButton = new JLabel("");
 		sineButton.setBounds(674, 49, 40, 33);

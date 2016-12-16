@@ -292,7 +292,6 @@ class Canvas extends JPanel
     	finalTable = new double[CANVAS_WIDTH];
     	Arrays.fill(finalTable, ((double)CANVAS_HEIGHT/2));
     	set = true;
-    	System.out.println("canvas width = " + width);
     }
     
     
