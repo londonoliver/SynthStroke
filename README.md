@@ -1,4 +1,4 @@
-SynthStroke 
+# SynthStroke 
 
 This is a software project I worked on for my Senior Design course at CSUN. It is a software synthesizer built using JSyn, an audio synthesis software API for Java: http://www.softsynth.com/jsyn/. The idea for the project was to create a software synthesizer with fully-drawable "canvases" as modulation sources. In short, the canvas works similar to a traditional synthesizer envelope: the y-axis represents modulation depth, and the x-axis represents time. Users can can create unique modulation curves by drawing on the canvas with their mouse.
 
