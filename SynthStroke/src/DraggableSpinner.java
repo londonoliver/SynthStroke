@@ -149,7 +149,7 @@ public class DraggableSpinner extends JPanel implements MouseListener, MouseMoti
 		});
 		
 		button = new JLabel();
-		button.setIcon(new ImageIcon("res/vertical_spinner_white.png"));
+		button.setIcon(new ImageIcon(getClass().getResource("resources/vertical_spinner_white.png")));
 		button.setCursor(Cursor.getPredefinedCursor(Cursor.N_RESIZE_CURSOR));
 		button.setBounds(110, 0, 8, 16);
 		add(button);

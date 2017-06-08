@@ -339,7 +339,7 @@ public class Frame {
         
         
 		skin = new JLabel("");
-		skin.setIcon(new ImageIcon("res/GUI 13.png"));
+		skin.setIcon(new ImageIcon(getClass().getResource("resources/GUI 13.png")));
 		skin.setBounds(0, 0, 914, 551);
 		frame.getContentPane().add(skin);
 		
